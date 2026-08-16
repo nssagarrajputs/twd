@@ -5,62 +5,49 @@ import Credibility from "@/app/about/_components/Credibility";
 import CTAFormat from "@/components/templates/CTAFormat";
 import MissionVision from "./_components/MissionVision";
 import PricingPolicy from "./_components/PricingPolicy";
-
-import type { Metadata } from "next";
 import { AboutPageSchema } from "@/components/StructuredData";
+import type { Metadata } from "next";
+import { client } from "@/sanity/client";
+import { metaDataWebpageQuery } from "@/sanity/lib/queries";
 
-export const metadata: Metadata = {
-    title: "About Tecorbitron – Founder-Led Digital Solutions Company",
-    description:
-        "Learn about Tecorbitron — a founder-led digital solutions company based in Ghaziabad, India. Modern web, app, and e-commerce solutions for startups and SMBs.",
+export async function generateMetadata(): Promise<Metadata> {
+    const page = await client.fetch(metaDataWebpageQuery, { slug: "about" });
 
-    keywords: [
-        // Brand discovery
-        "Tecorbitron",
-        "Tecorbitron Solutions Private Limited",
-        "about Tecorbitron",
+      const title = page?.metaTitle ?? "Tecorbitron";
+      const description =
+          page?.metaDescription ?? "Best IT Services and Development Company.";
+      const keywords = page?.keywords ?? [
+          "tecorbitron",
+          "web development company",
+          "app development company",
+          "information technology (it) company",
+      ];
 
-        // Founder searches
-        "Sagar Chauhan founder",
-        "Sagar Chauhan Tecorbitron",
-
-        // Trust signals people search before hiring
-        "founder-led IT company India",
-        "registered software company India",
-        "IT company Ghaziabad India",
-        "MCA registered tech company India",
-        "MSME registered IT company India",
-
-        // People checking credibility
-        "Tecorbitron reviews",
-        "Tecorbitron team",
-        "reliable software company India",
-        "transparent IT company India",
-    ],
-    alternates: { canonical: "/about" },
-    openGraph: {
-        type: "website",
-        title: "About Tecorbitron – Founder-Led Digital Solutions Company",
-        description:
-            "Learn about Tecorbitron — a founder-led digital solutions company based in Ghaziabad, India. Modern web, app, and e-commerce solutions for startups and SMBs.",
-        url: "https://www.tecorbitron.com/about",
-        images: [
-            {
-                url: "/opengraph/og-about.png",
-                width: 1200,
-                height: 630,
-                alt: "About Tecorbitron Solutions Pvt Ltd",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "About Tecorbitron – Founder-Led Digital Solutions Company",
-        description:
-            "Learn about Tecorbitron — a founder-led digital solutions company based in Ghaziabad, India. Modern web, app, and e-commerce solutions for startups and SMBs.",
-        images: ["/opengraph/og-about.png"],
-    },
-};
+    return {
+        title,
+        description,
+        keywords,
+        alternates: { canonical: "/about" },
+        openGraph: {
+            title,
+            description,
+            url: "https://www.tecorbitron.com/about",
+            images: [
+                {
+                    url: "/opengraph/og-global.png",
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            title,
+            description,
+            images: ["/opengraph/og-global.png"],
+        },
+    };
+}
 
 export default function About() {
     return (

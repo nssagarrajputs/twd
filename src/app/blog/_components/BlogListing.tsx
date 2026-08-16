@@ -51,7 +51,7 @@ export default function BlogListing({ posts, categories }: Props) {
                                 : "hover:border-primary active:border-primary"
                         }`}
                     >
-                        All
+                        All Blogs
                     </button>
                     {categories.map((cat) => (
                         <button
@@ -83,7 +83,7 @@ export default function BlogListing({ posts, categories }: Props) {
                                             alt={post.title}
                                             fill
                                             loading="eager"
-                                            className="object-cover grayscale-50 transition-transform duration-500 group-hover:scale-103 group-hover:grayscale-0 group-active:scale-103 group-active:grayscale-0"
+                                            className="object-cover transition-transform duration-500 group-hover:scale-102 group-active:scale-103 group-active:grayscale-0"
                                             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                         />
                                     </div>

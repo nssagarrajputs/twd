@@ -3,57 +3,53 @@ import Link from "next/link";
 import PageHero from "@/components/ui/PageHero";
 import { client } from "@/sanity/client";
 import { groq } from "next-sanity";
+import { metaDataWebpageQuery } from "@/sanity/lib/queries";
 import type { Metadata } from "next";
 import DefProjectThumbnail from "@/assets/other/default-thumbnail.webp";
 import { CaseStudiesPageSchema } from "@/components/StructuredData";
 
 export const revalidate = 21600;
 
-export const metadata: Metadata = {
-    title: "Case Studies — Real Projects by Tecorbitron",
-    description:
-        "See what we've built — real projects delivered for startups and businesses across industries. From websites and apps to e-commerce and custom digital solutions.",
+export async function generateMetadata(): Promise<Metadata> {
+    const page = await client.fetch(metaDataWebpageQuery, {
+        slug: "case-studies",
+    });
 
-    keywords: [
-        // Portfolio/proof searches
-        "Tecorbitron portfolio",
-        "Tecorbitron case studies",
-        "Tecorbitron work",
+      const title = page?.metaTitle ?? "Tecorbitron";
+      const description =
+          page?.metaDescription ?? "Best IT Services and Development Company.";
+      const keywords = page?.keywords ?? [
+          "tecorbitron",
+          "web development company",
+          "app development company",
+          "information technology (it) company",
+      ];
 
-        // Evaluation-stage searches
-        "web development company India projects",
-        "app development company India portfolio",
-        "software development company projects India",
-
-        // Trust-building
-        "real client projects web development India",
-        "web development results India",
-        "successful app development projects India",
-    ],
-    alternates: { canonical: "/case-studies" },
-    openGraph: {
-        type: "website",
-        title: "Case Studies — Real Projects by Tecorbitron",
-        description:
-            "See what we've built — real projects delivered for startups and businesses across industries. From websites and apps to e-commerce and custom digital solutions.",
-        url: "https://www.tecorbitron.com/case-studies",
-        images: [
-            {
-                url: "/opengraph/og-casestudies.png",
-                width: 1200,
-                height: 630,
-                alt: "Case Studies — Real Projects by Tecorbitron",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "Case Studies — Real Projects by Tecorbitron",
-        description:
-            "See what we've built — real projects delivered for startups and businesses across industries.",
-        images: ["/opengraph/og-casestudies.png"],
-    },
-};
+    return {
+        title,
+        description,
+        keywords,
+        alternates: { canonical: "/case-studies" },
+        openGraph: {
+            title,
+            description,
+            url: "https://www.tecorbitron.com/case-studies",
+            images: [
+                {
+                    url: "/opengraph/og-global.png",
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            title,
+            description,
+            images: ["/opengraph/og-global.png"],
+        },
+    };
+}
 
 export type Project = {
     title: string;
@@ -63,7 +59,7 @@ export type Project = {
 };
 
 const PORTFOLIO_LIST_QUERY = groq`
-  *[_type == "project"] | order(completedAt desc) {
+  *[_type == "caseStudy"] | order(completedAt desc) {
     title,
     "slug": slug.current,
     "thumbnail": thumbnail.asset->url,

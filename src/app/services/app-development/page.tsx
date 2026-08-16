@@ -7,65 +7,50 @@ import ServiceLetsConnect from "../_components/ServiceLetsConnect";
 import { serviceAppDevelopment } from "@/content/services-data";
 import type { Metadata } from "next";
 import { AppServiceSchema } from "@/components/StructuredData";
-export const metadata: Metadata = {
-    title: "App Development Company — Tecorbitron",
-    description:
-        "We design and develop mobile apps that perform on every platform — Android, iOS, and cross-platform. Built for startups and businesses ready to go mobile.",
-    keywords: [
-        // Primary
-        "mobile app development company India",
-        "app development services India",
-        "Android iOS app development India",
 
-        // Platform-specific
-        "iOS app development India",
-        "Android app development India",
-        "cross-platform app development India",
-        "React Native app development India",
-        "Flutter app development India",
+import { client } from "@/sanity/client";
+import { metaDataWebpageQuery } from "@/sanity/lib/queries";
 
-        // App type (from your solutions)
-        "on-demand app development India",
-        "e-commerce mobile app development",
-        "enterprise mobile app development India",
-        "EdTech app development India",
-        "MVP app development India",
+export async function generateMetadata(): Promise<Metadata> {
+    const page = await client.fetch(metaDataWebpageQuery, {
+        slug: "app-development",
+    });
 
-        // Persona
-        "app development for startups India",
-        "hire app developer India",
-        "mobile app development company Ghaziabad",
+    const title = page?.metaTitle ?? "Tecorbitron";
+    const description =
+        page?.metaDescription ?? "Best IT Services and Development Company.";
+    const keywords = page?.keywords ?? [
+        "tecorbitron",
+        "web development company",
+        "app development company",
+        "information technology (it) company",
+    ];
 
-        // Intent
-        "build mobile app India",
-        "app development with 3 months support",
-        "affordable app development India",
-        "Tecorbitron app development",
-    ],
-    alternates: { canonical: "/services/app-development" },
-    openGraph: {
-        type: "website",
-        title: "App Development Company — Tecorbitron",
-        description:
-            "We design and develop mobile apps that perform on every platform — Android, iOS, and cross-platform. Built for startups and businesses ready to go mobile.",
-        url: "https://www.tecorbitron.com/services/app-development",
-        images: [
-            {
-                url: "/opengraph/og-app-service.png",
-                width: 1200,
-                height: 630,
-                alt: "Tecorbitron Solutions — Custom Digital Systems",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "App Development Company — Tecorbitron",
-        description:
-            "We design and develop mobile apps that perform on every platform — Android, iOS, and cross-platform. Built for startups and businesses ready to go mobile.",
-        images: ["/opengraph/og-app-service.png"],
-    },
-};
+    return {
+        title,
+        description,
+        keywords,
+        alternates: { canonical: "/app-development" },
+        openGraph: {
+            title,
+            description,
+            url: "https://www.tecorbitron.com/services/app-development",
+            images: [
+                {
+                    url: "/opengraph/og-global.png",
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            title,
+            description,
+            images: ["/opengraph/og-global.png"],
+        },
+    };
+}
 
 export default function page() {
     return (

@@ -1,6 +1,7 @@
+import { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata = {
+export const metadata: Metadata = {
     title: "Page Not Found — Tecorbitron",
     description:
         "This page doesn't exist or has moved. Head back home or get in touch — we'll help you find what you're looking for.",

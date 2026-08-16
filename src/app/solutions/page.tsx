@@ -7,61 +7,50 @@ import ByThirdParty from "./_components/ByThirdParty";
 
 import type { Metadata } from "next";
 import { SolutionsPageSchema } from "@/components/StructuredData";
-export const metadata: Metadata = {
-    title: "Digital Solutions for Every Business — Tecorbitron",
-    description:
-        "From custom websites and web apps to CRM, ERP, LMS, and e-commerce — Tecorbitron builds digital solutions tailored to your business needs and goals.",
 
-    keywords: [
-        // Industry-specific solutions (from your data)
-        "ERP software development India",
-        "custom CRM development India",
-        "LMS development company India",
-        "hospital management system development",
-        "school management system development",
-        "real estate portal development India",
+import { client } from "@/sanity/client";
+import { metaDataWebpageQuery } from "@/sanity/lib/queries";
 
-        // Cloud + AI (your differentiator)
-        "AI chatbot development India",
-        "AI integration for business India",
-        "cloud application development India",
-        "serverless app development India",
+export async function generateMetadata(): Promise<Metadata> {
+    const page = await client.fetch(metaDataWebpageQuery, {
+        slug: "solutions",
+    });
 
-        // E-commerce solutions
-        "multi-vendor marketplace development",
-        "grocery delivery platform development",
-        "headless commerce solution India",
+    const title = page?.metaTitle ?? "Tecorbitron";
+    const description =
+        page?.metaDescription ?? "Best IT Services and Development Company.";
+    const keywords = page?.keywords ?? [
+        "tecorbitron",
+        "web development company",
+        "app development company",
+        "information technology (it) company",
+    ];
 
-        // General solution intent
-        "custom digital solutions India",
-        "business software development India",
-        "industry-specific software India",
-        "Tecorbitron solutions",
-    ],
-    alternates: { canonical: "/solutions" },
-    openGraph: {
-        type: "website",
-        title: "Digital Solutions for Every Business — Tecorbitron",
-        description:
-            "From custom websites and web apps to CRM, ERP, LMS, and e-commerce — Tecorbitron builds digital solutions tailored to your business needs and goals.",
-        url: "https://www.tecorbitron.com/solutions",
-        images: [
-            {
-                url: "/opengraph/og-solutions.png",
-                width: 1200,
-                height: 630,
-                alt: "Tecorbitron Solutions — Custom Digital Systems",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "Digital Solutions for Every Business — Tecorbitron",
-        description:
-            "From custom websites and web apps to CRM, ERP, LMS, and e-commerce — Tecorbitron builds digital solutions tailored to your business needs and goals.",
-        images: ["/opengraph/og-solutions.png"],
-    },
-};
+    return {
+        title,
+        description,
+        keywords,
+        alternates: { canonical: "/solutions" },
+        openGraph: {
+            title,
+            description,
+            url: "https://www.tecorbitron.com/solutions",
+            images: [
+                {
+                    url: "/opengraph/og-global.png",
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            title,
+            description,
+            images: ["/opengraph/og-global.png"],
+        },
+    };
+}
 
 function Page() {
     return (

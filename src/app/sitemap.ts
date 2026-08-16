@@ -10,13 +10,16 @@ type SanitySlugResult = {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    // ── Sanity se slugs fetch karo ──
-    const [projects, posts] = await Promise.all([
+    // ── Sanity se slugs fetch karo ── (type names update)
+    const [projects, posts, legalPages] = await Promise.all([
         client.fetch<SanitySlugResult[]>(
-            groq`*[_type == "project"]{ "slug": slug.current, "updatedAt": _updatedAt }`,
+            groq`*[_type == "caseStudy"]{ "slug": slug.current, "updatedAt": _updatedAt }`,
         ),
         client.fetch<SanitySlugResult[]>(
-            groq`*[_type == "post"]{ "slug": slug.current, "updatedAt": _updatedAt }`,
+            groq`*[_type == "blogPost"]{ "slug": slug.current, "updatedAt": _updatedAt }`,
+        ),
+        client.fetch<SanitySlugResult[]>(
+            groq`*[_type == "legalPage"]{ "slug": slug.current, "updatedAt": _updatedAt }`,
         ),
     ]);
 
@@ -34,6 +37,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(post.updatedAt),
         changeFrequency: "monthly",
         priority: 0.6,
+    }));
+
+    // ── Dynamic legal pages
+    const legalUrls: MetadataRoute.Sitemap = legalPages.map((page) => ({
+        url: `${baseUrl}/legal/${page.slug}`,
+        lastModified: new Date(page.updatedAt),
+        changeFrequency: "yearly",
+        priority: 0.1,
     }));
 
     return [
@@ -112,18 +123,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
 
         // ── Legal ──
-        {
-            url: `${baseUrl}/legal/privacy-policy`,
-            lastModified: new Date(),
-            changeFrequency: "yearly",
-            priority: 0.3,
-        },
-        {
-            url: `${baseUrl}/legal/terms`,
-            lastModified: new Date(),
-            changeFrequency: "yearly",
-            priority: 0.3,
-        },
+        ...legalUrls,
 
         // ── Dynamic pages ──
         ...portfolioUrls,

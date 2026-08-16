@@ -39,7 +39,7 @@ type RelatedPost = {
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 const BLOG_DETAIL_QUERY = groq`
-  *[_type == "post" && slug.current == $slug][0] {
+  *[_type == "blogPost" && slug.current == $slug][0] {
     title,
     "slug": slug.current,
     excerpt,
@@ -64,7 +64,7 @@ const BLOG_DETAIL_QUERY = groq`
 `;
 
 const BLOG_RELATED_QUERY = groq`
-  *[_type == "post" && slug.current != $slug] | order(publishedAt desc) [0...3] {
+  *[_type == "blogPost" && slug.current != $slug] | order(publishedAt desc) [0...3] {
     title,
     "slug": slug.current,
     publishedAt,

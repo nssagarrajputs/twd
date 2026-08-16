@@ -1,63 +1,52 @@
 import BlogListing from "@/app/blog/_components/BlogListing";
 import { client } from "@/sanity/client";
-
+import { metaDataWebpageQuery } from "@/sanity/lib/queries";
 import { groq } from "next-sanity";
-
 import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import { BlogPageSchema } from "@/components/StructuredData";
 
-export const metadata: Metadata = {
-    title: "Insights — Tecorbitron",
-    description:
-        "Expert articles, practical guides, and industry updates from the Tecorbitron team — written to help you build, grow, and scale your business online.",
+export async function generateMetadata(): Promise<Metadata> {
+    const page = await client.fetch(metaDataWebpageQuery, { slug: "blog" });
 
-    keywords: [
-        // Topical authority
-        "web development blog India",
-        "app development insights",
-        "SEO tips for businesses India",
-        "tech guides for startups India",
+      const title = page?.metaTitle ?? "Tecorbitron";
+      const description =
+          page?.metaDescription ?? "Best IT Services and Development Company.";
+      const keywords = page?.keywords ?? [
+          "tecorbitron",
+          "web development company",
+          "app development company",
+          "information technology (it) company",
+      ];
 
-        // Content discovery
-        "Tecorbitron blog",
-        "Tecorbitron insights",
-        "digital marketing tips India",
-        "Next.js tutorials",
-        "how to build a website India",
-
-        // Awareness → conversion path
-        "website development cost India",
-        "how to hire a web developer India",
-        "startup tech blog India",
-    ],
-    alternates: { canonical: "/blog" },
-    openGraph: {
-        type: "website",
-        title: "Insights — Tecorbitron",
-        description:
-            "Expert articles, practical guides, and industry updates from the Tecorbitron team — written to help you build, grow, and scale your business online.",
-        url: "https://www.tecorbitron.com/blog",
-        images: [
-            {
-                url: "/opengraph/og-insights.png",
-                width: 1200,
-                height: 630,
-                alt: "Insights — Tecorbitron",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "Insights — Tecorbitron",
-        description:
-            "Expert articles, practical guides, and industry updates from the Tecorbitron team — written to help you build, grow, and scale your business online.",
-        images: ["/opengraph/og-insights.png"],
-    },
-};
+    return {
+        title,
+        description,
+        keywords,
+        alternates: { canonical: "/blog" },
+        openGraph: {
+            title,
+            description,
+            url: "https://www.tecorbitron.com/blog",
+            images: [
+                {
+                    url: "/opengraph/og-global.png",
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            title,
+            description,
+            images: ["/opengraph/og-global.png"],
+        },
+    };
+}
 
 const BLOG_LISTING_QUERY = groq`
-  *[_type == "post"] | order(publishedAt desc) {
+  *[_type == "blogPost"] | order(publishedAt desc) {
     title,
     "slug": slug.current,
     publishedAt,
@@ -66,7 +55,7 @@ const BLOG_LISTING_QUERY = groq`
 `;
 
 const BLOG_CATEGORIES_QUERY = groq`
-  *[_type == "category"] | order(name asc) {
+  *[_type == "blogCategory"] | order(name asc) {
     name,
     "slug": slug.current,
   }

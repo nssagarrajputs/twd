@@ -28,29 +28,28 @@ type RelatedProject = {
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 const PORTFOLIO_DETAIL_QUERY = groq`
-  *[_type == "project" && slug.current == $slug][0] {
+  *[_type == "caseStudy" && slug.current == $slug][0] {
     projectName,
     title,
     "slug": slug.current,
     "thumbnail": thumbnail.asset->url,
     "industries": industries[]->name,
     "techStack": techStack[]->{name, category},
-    projectTypes,
     completedAt,
     livePreview,
-    summary,
-    problem,
-    solution,
-    result,
-    "screenshots": screenshots[]{
-      "url": asset->url,
-      alt
-    },
+    body[]{
+      ...,
+      _type == "image" => {
+        ...,
+        "asset": asset->{url}
+      }
+    }
+    
   }
 `;
 
 const PORTFOLIO_RELATED_QUERY = groq`
-  *[_type == "project" && slug.current != $slug] | order(completedAt desc) [0...3] {
+  *[_type == "caseStudy" && slug.current != $slug] | order(completedAt desc) [0...3] {
     projectName,
     title,
     "slug": slug.current,
@@ -221,6 +220,13 @@ export default async function ProjectDetailPage(props: {
 
                         <div className="section-edge-dark"></div>
 
+                        <div className="flex-vertical">
+                            <PortableText
+                                value={projData.body}
+                                components={ptComponents}
+                            />
+                        </div>
+
                         {projData.summary && (
                             <div className="flex flex-col gap-3">
                                 <h2 className="text-h3 text-ink-primary">
@@ -229,74 +235,6 @@ export default async function ProjectDetailPage(props: {
                                 <p className="text-body text-ink-secondary leading-relaxed">
                                     {projData.summary}
                                 </p>
-                            </div>
-                        )}
-
-                        {projData.problem && (
-                            <div className="flex flex-col gap-3">
-                                <CaseStudySection
-                                    title="The Problem"
-                                    content={projData.problem}
-                                />
-                            </div>
-                        )}
-
-                        {projData.solution && (
-                            <div className="flex flex-col gap-3">
-                                <CaseStudySection
-                                    title="Our Solution"
-                                    content={projData.solution}
-                                />
-                            </div>
-                        )}
-
-                        <div className="section-edge-dark"></div>
-
-                        {/* Screenshots */}
-                        {projData.screenshots?.length > 0 && (
-                            <div>
-                                <h2 className="text-h3 text-ink-primary mb-16">
-                                    Screenshots
-                                </h2>
-                                <div className="flex-vertical mx-auto max-w-5xl gap-12">
-                                    {projData.screenshots.map(
-                                        (
-                                            shot: {
-                                                url: string;
-                                                alt?: string;
-                                            },
-                                            idx: number,
-                                        ) => (
-                                            <div
-                                                key={idx}
-                                                className="edge-dark w-full border"
-                                            >
-                                                <Image
-                                                    src={shot.url}
-                                                    alt={
-                                                        shot.alt ??
-                                                        `${projData.projectName} — Screenshot ${idx + 1}`
-                                                    }
-                                                    width={1200}
-                                                    height={1000}
-                                                    className="h-auto w-full"
-                                                    loading="lazy"
-                                                />
-                                            </div>
-                                        ),
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="section-edge-dark"></div>
-
-                        {projData.result && (
-                            <div className="flex flex-col gap-3">
-                                <CaseStudySection
-                                    title="Results & Outcome"
-                                    content={projData.result}
-                                />
                             </div>
                         )}
                     </div>

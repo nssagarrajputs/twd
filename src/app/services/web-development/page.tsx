@@ -7,65 +7,48 @@ import ServiceLetsConnect from "../_components/ServiceLetsConnect";
 import { serviceWebDevelopment } from "@/content/services-data";
 import type { Metadata } from "next";
 import { WebServiceSchema } from "@/components/StructuredData";
-export const metadata: Metadata = {
-    title: "Web Development Company — Tecorbitron",
-    description:
-        "We design and develop websites and web applications that load fast, rank well, and convert visitors into customers — built specifically for your business goals.",
-    keywords: [
-        // Primary — highest volume
-        "web development company India",
-        "custom website development India",
-        "website development services India",
 
-        // Solution-specific (from your page)
-        "custom website design and development",
-        "WordPress website development India",
-        "landing page development service",
-        "web application development India",
-        "progressive web app development India",
-        "admin dashboard development",
-        "web portal development India",
+import { client } from "@/sanity/client";
+import { metaDataWebpageQuery } from "@/sanity/lib/queries";
 
-        // Tech-specific buyer searches
-        "Next.js website development company",
-        "React web development company India",
-        "TypeScript web development India",
+export async function generateMetadata(): Promise<Metadata> {
+    const page = await client.fetch(metaDataWebpageQuery, { slug: "web-development" });
 
-        // Persona
-        "website development for startups India",
-        "business website development India",
-        "website development company Ghaziabad",
+    const title = page?.metaTitle ?? "Tecorbitron";
+    const description =
+        page?.metaDescription ?? "Best IT Services and Development Company.";
+    const keywords = page?.keywords ?? [
+        "tecorbitron",
+        "web development company",
+        "app development company",
+        "information technology (it) company",
+    ];
 
-        // Pricing/hiring intent
-        "hire web developer India",
-        "affordable website development India",
-        "website development with support India",
-        "Tecorbitron web development",
-    ],
-    alternates: { canonical: "/services/web-development" },
-    openGraph: {
-        type: "website",
-        title: "Web Development Company — Tecorbitron",
-        description:
-            "We design and develop websites and web applications that load fast, rank well, and convert visitors into customers — built specifically for your business goals.",
-        url: "https://www.tecorbitron.com/services/web-development",
-        images: [
-            {
-                url: "/opengraph/og-web-service.png",
-                width: 1200,
-                height: 630,
-                alt: "Tecorbitron Solutions — Custom Digital Systems",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "Web Development Company — Tecorbitron",
-        description:
-            "We design and develop websites and web applications that load fast, rank well, and convert visitors into customers — built specifically for your business goals.",
-        images: ["/opengraph/og-web-service.png"],
-    },
-};
+    return {
+        title,
+        description,
+        keywords,
+        alternates: { canonical: "/web-development" },
+        openGraph: {
+            title,
+            description,
+            url: "https://www.tecorbitron.com/services/web-development",
+            images: [
+                {
+                    url: "/opengraph/og-global.png",
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            title,
+            description,
+            images: ["/opengraph/og-global.png"],
+        },
+    };
+}
 
 export default function page() {
     return (

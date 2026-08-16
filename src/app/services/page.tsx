@@ -12,63 +12,47 @@ import {
     SeoServiceSchema,
 } from "@/components/StructuredData";
 
-export const metadata: Metadata = {
-    title: "Explore Our Services — Tecorbitron",
-    description:
-        "From websites and apps to e-commerce and SEO — built for startups and businesses. Fast delivery, transparent pricing, 3 months support included.",
-    keywords: [
-        // Core service intent
-        "web and app development services India",
-        "digital services for startups India",
-        "IT services for small businesses India",
-        "custom software development services India",
+import { client } from "@/sanity/client";
+import { metaDataWebpageQuery } from "@/sanity/lib/queries";
 
-        // Buyer journey — comparison stage
-        "best web development company India",
-        "hire software development team India",
-        "outsource web development India",
-        "affordable IT services India",
+export async function generateMetadata(): Promise<Metadata> {
+    const page = await client.fetch(metaDataWebpageQuery, { slug: "services" });
 
-        // Package/pricing searches
-        "website development packages India",
-        "web development pricing India",
-        "fixed price web development India",
+    const title = page?.metaTitle ?? "Tecorbitron";
+    const description =
+        page?.metaDescription ?? "Best IT Services and Development Company.";
+    const keywords = page?.keywords ?? [
+        "tecorbitron",
+        "web development company",
+        "app development company",
+        "information technology (it) company",
+    ];
 
-        // Location
-        "IT services Ghaziabad",
-        "digital agency NCR India",
-        "web development company near me India",
-
-        // Trust
-        "Tecorbitron services",
-        "post-launch support web development",
-    ],
-    alternates: { canonical: "/services" },
-    openGraph: {
-        type: "website",
-        title: "Explore Our Services — Tecorbitron",
-        description:
-            "From websites and apps to e-commerce and SEO — built for startups and businesses. Fast delivery, transparent pricing, 3 months support included.",
-
-        url: "https://www.tecorbitron.com/services",
-
-        images: [
-            {
-                url: "/opengraph/og-services.png",
-                width: 1200,
-                height: 630,
-                alt: "Tecorbitron Services — Web, App & Software Development",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "Explore Our Services — Tecorbitron",
-        description:
-            "From websites and apps to e-commerce and SEO — built for startups and businesses. Fast delivery, transparent pricing, 3 months support included.",
-        images: ["/opengraph/og-services.png"],
-    },
-};
+    return {
+        title,
+        description,
+        keywords,
+        alternates: { canonical: "/services" },
+        openGraph: {
+            title,
+            description,
+            url: "https://www.tecorbitron.com/services",
+            images: [
+                {
+                    url: "/opengraph/og-global.png",
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            title,
+            description,
+            images: ["/opengraph/og-global.png"],
+        },
+    };
+}
 
 const faqdata = [
     {

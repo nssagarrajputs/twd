@@ -5,59 +5,47 @@ import PageHero from "@/components/ui/PageHero";
 import ProjectInquiry from "./_components/ProjectInquiry";
 import WaysToConnect from "./_components/WaysToConnect";
 import FAQSection from "@/components/templates/FAQFormat";
+import { client } from "@/sanity/client";
+import { metaDataWebpageQuery } from "@/sanity/lib/queries";
 
-export const metadata: Metadata = {
-    title: "Contact Us — Tecorbitron",
-    description:
-        "Got a project in mind? Get in touch with Tecorbitron — we'll get back to you within 24 hours. Let's build something great together.",
-    keywords: [
-        // Bottom-funnel — MOST important page
-        "hire web developer India",
-        "hire app developer India",
-        "start a web development project India",
-        "get website development quote India",
-        "app development consultation India",
+export async function generateMetadata(): Promise<Metadata> {
+    const page = await client.fetch(metaDataWebpageQuery, { slug: "contact" });
 
-        // Brand + contact
-        "Tecorbitron contact",
-        "contact Tecorbitron",
-        "Tecorbitron inquiry",
+    const title = page?.metaTitle ?? "Tecorbitron";
+    const description =
+        page?.metaDescription ?? "Best IT Services and Development Company.";
+    const keywords = page?.keywords ?? [
+        "tecorbitron",
+        "web development company",
+        "app development company",
+        "information technology (it) company",
+    ];
 
-        // Location-specific
-        "IT company Ghaziabad contact",
-        "software company NCR inquiry",
-
-        // Trust
-        "free web development consultation India",
-        "NDA software development India",
-        "registered IT company contact India",
-    ],
-    alternates: { canonical: "/contact" },
-    openGraph: {
-        type: "website",
-        title: "Contact Us — Tecorbitron",
-        description:
-            "Got a project in mind? Get in touch with Tecorbitron — we'll get back to you within 24 hours. Let's build something great together.",
-
-        url: "https://www.tecorbitron.com/contact",
-
-        images: [
-            {
-                url: "/opengraph/og-contact.png",
-                width: 1200,
-                height: 630,
-                alt: "Contact Us — Tecorbitron",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "Contact Us — Tecorbitron",
-        description:
-            "Got a project in mind? Get in touch with Tecorbitron — we'll get back to you within 24 hours. Let's build something great together.",
-        images: ["/opengraph/og-contact.png"],
-    },
-};
+    return {
+        title,
+        description,
+        keywords,
+        alternates: { canonical: "/contact" },
+        openGraph: {
+            title,
+            description,
+            url: "https://www.tecorbitron.com/contact",
+            images: [
+                {
+                    url: "/opengraph/og-global.png",
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            title,
+            description,
+            images: ["/opengraph/og-global.png"],
+        },
+    };
+}
 
 const faqdata = [
     {

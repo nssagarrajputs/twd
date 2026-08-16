@@ -50,7 +50,7 @@ const footerMenus: footerMenuItem[] = [
             { label: "Contact Us", href: "/contact" },
             { label: "Insights", href: "/blog" },
             { label: "Privacy Policy", href: "/legal/privacy-policy" },
-            { label: "Terms", href: "/legal/terms" },
+            { label: "Terms", href: "/legal/terms-and-conditions" },
         ],
     },
     {

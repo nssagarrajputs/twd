@@ -1,119 +1,105 @@
-import { notFound } from "next/navigation";
+import { PortableText } from "@portabletext/react";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import PageHero from "@/components/ui/PageHero";
+import { client } from "@/sanity/client";
+import { ptComponents } from "@/components/PortableTextFormat";
 
-import { privacyPolicy, termsAndConditions } from "@/content/legal-data";
-import Link from "next/link";
+// ─── Queries ────────────────────────────────────────────────────────
 
-type LegalSection = {
-    id: string;
-    title: string;
-    content: string;
-};
+const LEGAL_PAGE_QUERY = `*[_type == "legalPage" && slug.current == $slug][0]{
+  title,
+  slug,
+  seoTitle,
+  seoDescription,
+  lastUpdatedOn,
+  body
+}`;
 
-type LegalDocument = {
-    meta: {
-        title: string;
-        description: string;
-        canonical: string;
-        lastUpdated: string;
-    };
-    hero: {
-        eyebrow: string;
-        title: string;
-        highlight: string;
-        description: string;
-    };
-    intro: string;
-    crossLink: {
-        label: string;
-        href: string;
-    };
-    sections: LegalSection[];
-};
+const LEGAL_PAGE_SLUGS_QUERY = `*[_type == "legalPage" && defined(slug.current)]{
+  "slug": slug.current
+}`;
 
-// ── Registry — add new legal docs here ───────────────────────────────────────
-const legalDocs: Record<string, LegalDocument> = {
-    "privacy-policy": privacyPolicy,
-    terms: termsAndConditions,
-};
-
-// ── Static params ─────────────────────────────────────────────────────────────
-export function generateStaticParams() {
-    return Object.keys(legalDocs).map((slug) => ({ slug }));
+async function getLegalPage(slug: string) {
+    return client.fetch(LEGAL_PAGE_QUERY, { slug });
 }
 
-// ── Metadata ──────────────────────────────────────────────────────────────────
-export async function generateMetadata(props: {
+// ─── Static params (SSG) ────────────────────────────────────────────
+
+export async function generateStaticParams() {
+    const pages: { slug: string }[] = await client.fetch(
+        LEGAL_PAGE_SLUGS_QUERY,
+    );
+    return pages.map((page) => ({ slug: page.slug }));
+}
+
+// ─── Metadata ───────────────────────────────────────────────────────
+
+export async function generateMetadata({
+    params,
+}: {
     params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-    const { slug } = await props.params;
-    const doc = legalDocs[slug];
-    if (!doc) return {};
+    const { slug } = await params;
+    const page = await getLegalPage(slug);
+
+    if (!page) {
+        return {};
+    }
 
     return {
-        title: doc.meta.title,
-        description: doc.meta.description,
-        alternates: { canonical: doc.meta.canonical },
+        title: page.seoTitle,
+        description: page.seoDescription,
+        alternates: { canonical: `/legal/${page.slug.current}` },
         robots: { index: false, follow: false },
     };
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
-export default async function LegalPage(props: {
+// ─── Page ───────────────────────────────────────────────────────────
+
+export default async function LegalPage({
+    params,
+}: {
     params: Promise<{ slug: string }>;
 }) {
-    const { slug } = await props.params;
-    const doc = legalDocs[slug];
+    const { slug } = await params;
+    const page = await getLegalPage(slug);
 
-    if (!doc) notFound();
+    if (!page) {
+        notFound();
+    }
+
+    const formattedDate = new Date(page.lastUpdatedOn).toLocaleDateString(
+        "en-US",
+        {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        },
+    );
 
     return (
         <main>
             <PageHero
-                eyebrow={doc.hero.eyebrow}
-                title={doc.hero.title}
-                description={doc.hero.description}
+                eyebrow="legal"
+                title={page.title}
+                description={`Last Updated: ${formattedDate}, Effective Immediately`}
             />
 
             <section className="side-layout-spacing">
                 <div className="edge-light bg-canvas-white side-breathing mx-auto max-w-7xl border-x py-24">
-                    {/* Intro note */}
-                    <p className="text-18 text-ink-primary mb-16 leading-relaxed italic">
-                        {doc.intro}
-                    </p>
-
-                    {/* Sections */}
-                    <article className="flex-vertical gap-16">
-                        {doc.sections.map((section) => (
-                            <div
-                                key={section.id}
-                                id={section.id}
-                                className="flex-vertical gap-8"
-                            >
-                                <h2 className="edge-light card-heading border-b pb-4">
-                                    {section.title}
-                                </h2>
-
-                                <p className="card-caption max-w-4xl whitespace-pre-line md:pl-4">
-                                    {section.content}
-                                </p>
-                            </div>
-                        ))}
+                    <article className="">
+                        <PortableText
+                            value={page.body}
+                            components={ptComponents}
+                        />
                     </article>
 
                     {/* Bottom nav */}
                     <div className="edge-light flex-center mt-16 flex-wrap gap-8 border-t pt-16 md:justify-between">
                         <p className="text-ink-muted text-16">
-                            Last Updated: {doc.meta.lastUpdated}
+                            Last Updated: {formattedDate}
                         </p>
-
-                        <Link
-                            href={doc.crossLink.href}
-                            className="button-primary"
-                        >
-                            {doc.crossLink.label}
-                        </Link>
                     </div>
                 </div>
             </section>

@@ -7,66 +7,48 @@ import ServiceLetsConnect from "../_components/ServiceLetsConnect";
 import { serviceEcommerceDevelopment } from "@/content/services-data";
 import type { Metadata } from "next";
 import { EcommerceServiceSchema } from "@/components/StructuredData";
-export const metadata: Metadata = {
-    title: "E-Commerce Development Company — Tecorbitron",
-    description:
-        "We build online stores that load fast, convert well, and are easy to manage — on Shopify, WooCommerce, or fully custom. Built for businesses ready to sell online.",
 
-    keywords: [
-        // Primary
-        "ecommerce development company India",
-        "online store development India",
-        "ecommerce website development India",
+import { client } from "@/sanity/client";
+import { metaDataWebpageQuery } from "@/sanity/lib/queries";
 
-        // Platform-specific (very high intent)
-        "Shopify development company India",
-        "Shopify store development India",
-        "WooCommerce development India",
-        "WooCommerce website development",
-        "BigCommerce development India",
-        "headless commerce development India",
+export async function generateMetadata(): Promise<Metadata> {
+    const page = await client.fetch(metaDataWebpageQuery, { slug: "ecommerce-development" });
 
-        // Solution-specific
-        "custom ecommerce development India",
-        "ecommerce platform migration service",
-        "multi-vendor marketplace development India",
-        "B2B ecommerce development India",
+    const title = page?.metaTitle ?? "Tecorbitron";
+    const description =
+        page?.metaDescription ?? "Best IT Services and Development Company.";
+    const keywords = page?.keywords ?? [
+        "tecorbitron",
+        "web development company",
+        "app development company",
+        "information technology (it) company",
+    ];
 
-        // Persona
-        "ecommerce development for D2C brands India",
-        "online store development for small business",
-        "Shopify developer India",
-        "hire ecommerce developer India",
-
-        // Intent
-        "build online store India",
-        "ecommerce store with payment gateway India",
-        "Tecorbitron ecommerce",
-    ],
-    alternates: { canonical: "/services/ecommerce-development" },
-    openGraph: {
-        type: "website",
-        title: "E-Commerce Development Company — Tecorbitron",
-        description:
-            "We build online stores that load fast, convert well, and are easy to manage — on Shopify, WooCommerce, or fully custom. Built for businesses ready to sell online.",
-        url: "https://www.tecorbitron.com/services/ecommerce-development",
-        images: [
-            {
-                url: "/opengraph/og-ecomm-service.png",
-                width: 1200,
-                height: 630,
-                alt: "Tecorbitron Solutions — Custom Digital Systems",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "E-Commerce Development Company — Tecorbitron",
-        description:
-            "We build online stores that load fast, convert well, and are easy to manage — on Shopify, WooCommerce, or fully custom. Built for businesses ready to sell online.",
-        images: ["/opengraph/og-ecomm-service.png"],
-    },
-};
+    return {
+        title,
+        description,
+        keywords,
+        alternates: { canonical: "/ecommerce-development" },
+        openGraph: {
+            title,
+            description,
+            url: "https://www.tecorbitron.com/services/ecommerce-development",
+            images: [
+                {
+                    url: "/opengraph/og-global.png",
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            title,
+            description,
+            images: ["/opengraph/og-global.png"],
+        },
+    };
+}
 
 export default function page() {
     return (

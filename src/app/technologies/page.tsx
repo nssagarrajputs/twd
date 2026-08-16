@@ -4,63 +4,49 @@ import CTAFormat from "@/components/templates/CTAFormat";
 import { technologyGroups } from "@/content/technologies-data";
 import TechStack from "./_components/TechStack";
 
-export const metadata: Metadata = {
-    title: "The Stack Behind Every Project — Tecorbitron",
-    description:
-        "Explore the tech stack behind every Tecorbitron project — from frontend frameworks and backend systems to cloud, AI, and e-commerce platforms.",
-    keywords: [
-        // Tech stack — people looking for specific expertise
-        "Next.js development company India",
-        "React developer India",
-        "TypeScript development company",
-        "Node.js development India",
-        "Flutter developer India",
-        "React Native developer India",
+import { client } from "@/sanity/client";
+import { metaDataWebpageQuery } from "@/sanity/lib/queries";
 
-        // Cloud
-        "AWS development company India",
-        "Google Cloud development India",
-        "Firebase development India",
+export async function generateMetadata(): Promise<Metadata> {
+    const page = await client.fetch(metaDataWebpageQuery, {
+        slug: "technologies",
+    });
 
-        // AI/LLM
-        "OpenAI integration services India",
-        "LangChain development India",
-        "AI development company India",
+    const title = page?.metaTitle ?? "Tecorbitron";
+    const description =
+        page?.metaDescription ?? "Best IT Services and Development Company.";
+    const keywords = page?.keywords ?? [
+        "tecorbitron",
+        "web development company",
+        "app development company",
+        "information technology (it) company",
+    ];
 
-        // CMS
-        "Sanity CMS development",
-        "WordPress development India",
-        "headless CMS development India",
-
-        // General
-        "modern tech stack web development India",
-        "Tecorbitron technologies",
-        "full stack development company India",
-    ],
-    alternates: { canonical: "/technologies" },
-    openGraph: {
-        type: "website",
-        title: "The Stack Behind Every Project — Tecorbitron",
-        description:
-            "Explore the tech stack behind every Tecorbitron project — from frontend frameworks and backend systems to cloud, AI, and e-commerce platforms.",
-        url: "https://www.tecorbitron.com/technologies",
-        images: [
-            {
-                url: "/opengraph/og-technologies.png",
-                width: 1200,
-                height: 630,
-                alt: "Tecorbitron Technologies & Tech Stack",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "The Stack Behind Every Project — Tecorbitron",
-        description:
-            "Explore the tech stack behind every Tecorbitron project — from frontend frameworks and backend systems to cloud, AI, and e-commerce platforms.",
-        images: ["/opengraph/og-technologies.png"],
-    },
-};
+    return {
+        title,
+        description,
+        keywords,
+        alternates: { canonical: "/technologies" },
+        openGraph: {
+            title,
+            description,
+            url: "https://www.tecorbitron.com/technologies",
+            images: [
+                {
+                    url: "/opengraph/og-global.png",
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            title,
+            description,
+            images: ["/opengraph/og-global.png"],
+        },
+    };
+}
 
 export default function TechnologiesPage() {
     return (

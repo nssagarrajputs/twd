@@ -7,65 +7,49 @@ import ServiceLetsConnect from "../_components/ServiceLetsConnect";
 import { serviceSeoAndMarketing } from "@/content/services-data";
 import type { Metadata } from "next";
 import { SeoServiceSchema } from "@/components/StructuredData";
-export const metadata: Metadata = {
-    title: "SEO Services Company — Tecorbitron",
-    description:
-        "We improve your search visibility with technical, on-page, and content SEO strategies that bring real, qualified traffic and measurable business results.",
-    keywords: [
-        // Primary
-        "SEO services India",
-        "SEO company India",
-        "digital marketing services India",
 
-        // Service-specific (very high intent)
-        "technical SEO services India",
-        "on-page SEO services India",
-        "local SEO services India",
-        "local SEO company Ghaziabad",
-        "ecommerce SEO services India",
-        "SEO audit services India",
-        "Google Ads management India",
-        "PPC services India",
 
-        // Platform
-        "Google Business Profile optimization India",
-        "GA4 setup services India",
+import { client } from "@/sanity/client";
+import { metaDataWebpageQuery } from "@/sanity/lib/queries";
 
-        // Persona
-        "SEO for startups India",
-        "SEO for small business India",
-        "SEO company NCR India",
-        "affordable SEO services India",
+export async function generateMetadata(): Promise<Metadata> {
+    const page = await client.fetch(metaDataWebpageQuery, { slug: "seo-and-marketing" });
 
-        // Intent
-        "hire SEO expert India",
-        "monthly SEO retainer India",
-        "SEO services with monthly reporting",
-    ],
-    alternates: { canonical: "/services/seo-and-marketing" },
-    openGraph: {
-        type: "website",
-        title: "SEO Services Company — Tecorbitron",
-        description:
-            "We improve your search visibility with technical, on-page, and content SEO strategies that bring real, qualified traffic and measurable business results.",
-        url: "https://www.tecorbitron.com/services/seo-and-marketing",
-        images: [
-            {
-                url: "/opengraph/og-seo-service.png",
-                width: 1200,
-                height: 630,
-                alt: "Tecorbitron Solutions — Custom Digital Systems",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "SEO Services Company — Tecorbitron",
-        description:
-            "We improve your search visibility with technical, on-page, and content SEO strategies that bring real, qualified traffic and measurable business results.",
-        images: ["/opengraph/og-seo-service.png"],
-    },
-};
+    const title = page?.metaTitle ?? "Tecorbitron";
+    const description =
+        page?.metaDescription ?? "Best IT Services and Development Company.";
+    const keywords = page?.keywords ?? [
+        "tecorbitron",
+        "web development company",
+        "app development company",
+        "information technology (it) company",
+    ];
+
+    return {
+        title,
+        description,
+        keywords,
+        alternates: { canonical: "/seo-and-marketing" },
+        openGraph: {
+            title,
+            description,
+            url: "https://www.tecorbitron.com/services/seo-and-marketing",
+            images: [
+                {
+                    url: "/opengraph/og-global.png",
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            title,
+            description,
+            images: ["/opengraph/og-global.png"],
+        },
+    };
+}
 
 export default function page() {
     return (
