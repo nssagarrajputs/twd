@@ -8,20 +8,16 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { GlobalSchema } from "@/components/StructuredData";
 import { client } from "@/sanity/client";
-import { metaDataWebpageQuery } from "@/sanity/lib/queries";
+import { META_DATA_WEBPAGE_QUERY } from "@/sanity/lib/queries";
 
 export async function generateMetadata(): Promise<Metadata> {
-    const page = await client.fetch(metaDataWebpageQuery, { slug: "global" });
+    const page = await client.fetch(META_DATA_WEBPAGE_QUERY, {
+        slug: "global",
+    });
 
     const title = page?.metaTitle ?? "Tecorbitron";
-    const description =
-        page?.metaDescription ?? "Best IT Services and Development Company.";
-    const keywords = page?.keywords ?? [
-        "tecorbitron",
-        "web development company",
-        "app development company",
-        "information technology (it) company",
-    ];
+    const description = page?.metaDescription ?? "Best IT Services Company.";
+    const keywords = page?.keywords ?? ["tecorbitron"];
 
     return {
         title,

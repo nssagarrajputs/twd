@@ -3,37 +3,35 @@ import Link from "next/link";
 import PageHero from "@/components/ui/PageHero";
 import { client } from "@/sanity/client";
 import { groq } from "next-sanity";
-import { metaDataWebpageQuery } from "@/sanity/lib/queries";
+
 import type { Metadata } from "next";
 import DefProjectThumbnail from "@/assets/other/default-thumbnail.webp";
 import { CaseStudiesPageSchema } from "@/components/StructuredData";
-
-export const revalidate = 21600;
+import { META_DATA_WEBPAGE_QUERY } from "@/sanity/lib/queries";
 
 export async function generateMetadata(): Promise<Metadata> {
-    const page = await client.fetch(metaDataWebpageQuery, {
-        slug: "case-studies",
+    const slug = "case-studies";
+
+    const metaData = await client.fetch(META_DATA_WEBPAGE_QUERY, {
+        slug,
     });
 
-      const title = page?.metaTitle ?? "Tecorbitron";
-      const description =
-          page?.metaDescription ?? "Best IT Services and Development Company.";
-      const keywords = page?.keywords ?? [
-          "tecorbitron",
-          "web development company",
-          "app development company",
-          "information technology (it) company",
-      ];
+    const title = metaData?.metaTitle ?? "Case Studies - Tecorbitron";
+    const description =
+        metaData?.metaDescription ?? "Best IT Services Company.";
+    const keywords = metaData?.keywords ?? ["case studies tecorbitron"];
 
     return {
         title,
         description,
         keywords,
-        alternates: { canonical: "/case-studies" },
+
+        alternates: { canonical: `/${slug}` },
         openGraph: {
-            title,
-            description,
-            url: "https://www.tecorbitron.com/case-studies",
+            type: "website",
+            locale: "en_IN",
+            siteName: "Tecorbitron",
+            url: `https://www.tecorbitron.com/${slug}`,
             images: [
                 {
                     url: "/opengraph/og-global.png",
@@ -44,8 +42,6 @@ export async function generateMetadata(): Promise<Metadata> {
             ],
         },
         twitter: {
-            title,
-            description,
             images: ["/opengraph/og-global.png"],
         },
     };
