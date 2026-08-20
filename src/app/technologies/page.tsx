@@ -49,9 +49,8 @@ export default function TechnologiesPage() {
     return (
         <main className="bg-bkg-primary">
             <PageHero
-                eyebrow="Tools & Tech"
-                title="The Stack Behind Every Project"
-                highlight="Every Project"
+                title="Tools & Technologies"
+                highlight="Technologies"
                 description="We pick the right technology for the right problem — modern frameworks, proven backends, reliable cloud infrastructure, and tools that are built to scale with your business. No unnecessary complexity, no outdated stacks."
             />
 

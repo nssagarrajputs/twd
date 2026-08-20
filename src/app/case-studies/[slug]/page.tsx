@@ -3,11 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { PortableText } from "@portabletext/react";
-import type { PortableTextBlock } from "@portabletext/react";
 import { client } from "@/sanity/client";
 import { groq } from "next-sanity";
 import DefBlogThumbnail from "@/assets/other/default-thumbnail.webp";
-import { ptComponents } from "@/components/PortableTextFormat";
+import { bcsComponents } from "@/components/PTF/BlogCaseText";
 import { CaseStudySchema } from "@/components/StructuredData";
 import type { Metadata } from "next";
 import CTAFormat from "@/components/templates/CTAFormat";
@@ -116,26 +115,6 @@ export async function generateMetadata(props: {
     };
 }
 
-// ─── Case Study Section ───────────────────────────────────────────────────────
-
-function CaseStudySection({
-    title,
-    content,
-}: {
-    title: string;
-    content: PortableTextBlock[] | null;
-}) {
-    if (!content || content.length === 0) return null;
-    return (
-        <div className="flex flex-col gap-4">
-            <h2 className="text-h3 text-ink-primary">{title}</h2>
-            <div className="flex flex-col gap-3">
-                <PortableText value={content} components={ptComponents} />
-            </div>
-        </div>
-    );
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function ProjectDetailPage(props: {
@@ -220,23 +199,12 @@ export default async function ProjectDetailPage(props: {
 
                         <div className="section-edge-dark"></div>
 
-                        <div className="flex-vertical">
+                        <div className="">
                             <PortableText
                                 value={projData.body}
-                                components={ptComponents}
+                                components={bcsComponents}
                             />
                         </div>
-
-                        {projData.summary && (
-                            <div className="flex flex-col gap-3">
-                                <h2 className="text-h3 text-ink-primary">
-                                    Summary
-                                </h2>
-                                <p className="text-body text-ink-secondary leading-relaxed">
-                                    {projData.summary}
-                                </p>
-                            </div>
-                        )}
                     </div>
                 </div>
             </section>

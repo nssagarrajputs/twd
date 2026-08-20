@@ -1,9 +1,9 @@
-import { PortableText } from "@portabletext/react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PageHero from "@/components/ui/PageHero";
 import { client } from "@/sanity/client";
-import { ptComponents } from "@/components/PortableTextFormat";
+import { PortableText } from "@portabletext/react";
+import { legalTextComponents } from "@/components/PTF/LegalText";
 
 // ─── Queries ────────────────────────────────────────────────────────
 
@@ -88,19 +88,12 @@ export default async function LegalPage({
 
             <section className="side-layout-spacing">
                 <div className="edge-light bg-canvas-white side-breathing mx-auto max-w-7xl border-x py-24">
-                    <article className="">
+                    <article className="mx-auto max-w-4xl">
                         <PortableText
                             value={page.body}
-                            components={ptComponents}
+                            components={legalTextComponents}
                         />
                     </article>
-
-                    {/* Bottom nav */}
-                    <div className="edge-light flex-center mt-16 flex-wrap gap-8 border-t pt-16 md:justify-between">
-                        <p className="text-ink-muted text-16">
-                            Last Updated: {formattedDate}
-                        </p>
-                    </div>
                 </div>
             </section>
         </main>

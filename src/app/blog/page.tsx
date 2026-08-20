@@ -72,8 +72,8 @@ export default async function Blog() {
 
             <PageHero
                 eyebrow="Blogs & Insights"
-                title="Stay Informed. Stay Ahead."
-                highlight="Stay Ahead."
+                title="Blogs & Insights"
+                highlight="Insights"
                 description="Practical guides, expert articles, and industry updates on tech and businesses — written by the Tecorbitron team."
             />
 

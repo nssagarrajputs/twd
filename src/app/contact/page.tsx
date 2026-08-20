@@ -55,9 +55,8 @@ export default async function Contact() {
             <ContactPageSchema />
 
             <PageHero
-                eyebrow="Get in Touch"
-                title="Let's Connect"
-                highlight="Connect"
+                title="Contact Us"
+                highlight="Us"
                 description="Share your idea and we'll get back to you shortly — free consultation, no strings attached."
             />
 

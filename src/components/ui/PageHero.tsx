@@ -1,12 +1,11 @@
 type PageHeroProps = {
-    eyebrow: string;
+    eyebrow?: string;
     title: string;
     highlight?: string;
     description?: string;
 };
 
 export default function PageHero({
-    eyebrow,
     title,
     highlight,
     description,
@@ -24,10 +23,6 @@ export default function PageHero({
             />
 
             <div className="relative z-10 mx-auto max-w-7xl">
-                <div className="edge-dark flex-center side-breathing w-full border-x border-b py-12">
-                    <span className="display-headline">{eyebrow}</span>
-                </div>
-
                 <div className="edge-dark side-breathing border-x pt-16 pb-24">
                     <h1 className="display-page-heading mb-8">
                         {highlight ? (

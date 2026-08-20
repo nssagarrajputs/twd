@@ -168,7 +168,7 @@ export const ptComponents: PortableTextComponents = {
         // Inline Image
         image: ({ value }: { value: InlineImage }) => (
             <figure className="my-2">
-                <div className="edge-dark mx-auto my-12 max-h-120 max-w-4xl border">
+                <div className="edge-dark mx-auto my-6 max-w-4xl border">
                     <Image
                         src={value.asset?.url || DefaultImage}
                         alt={value.alt ?? "Image"}

@@ -55,9 +55,8 @@ function Page() {
             <SolutionsPageSchema />
 
             <PageHero
-                eyebrow="Our Solutions"
-                title="Right Solution for Every Business Need"
-                highlight="Every Business Need"
+                title="View All Solutions"
+                highlight="Solutions"
                 description="From early-stage startups to established enterprises — we build web, app, e-commerce, and custom digital solutions that are scoped to your business and built to deliver results."
             />
 
