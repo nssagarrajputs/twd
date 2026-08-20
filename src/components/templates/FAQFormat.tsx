@@ -1,14 +1,15 @@
 "use client";
-
 import { useState } from "react";
-import Link from "next/link";
 import { Plus } from "lucide-react";
+import { PortableText, type PortableTextComponents } from "@portabletext/react";
+import type { PortableTextBlock } from "@portabletext/types";
 
 type FAQItem = {
+    _id: string;
     question: string;
-    answer: string;
-    link?: string;
-    linkText?: string;
+    plainAnswer: string;
+    richAnswer: PortableTextBlock[];
+    sortOrder?: number;
 };
 
 type FAQSectionProps = {
@@ -16,6 +17,56 @@ type FAQSectionProps = {
     heading: string;
     items: FAQItem[];
     defaultOpenIndex?: number | null;
+};
+
+const portableTextComponents: PortableTextComponents = {
+    marks: {
+        strong: ({ children }) => (
+            <strong className="font-semibold">{children}</strong>
+        ),
+
+        em: ({ children }) => <em>{children}</em>,
+
+        underline: ({ children }) => (
+            <span className="underline">{children}</span>
+        ),
+
+        link: ({ value, children }) => {
+            const href = value?.href;
+            const blank = value?.blank;
+
+            if (!href) {
+                return <>{children}</>;
+            }
+
+            return (
+                <a
+                    href={href}
+                    target={blank ? "_blank" : undefined}
+                    rel={blank ? "noopener noreferrer" : undefined}
+                    className="text-primary underline underline-offset-4"
+                    onClick={(event) => event.stopPropagation()}
+                >
+                    {children}
+                </a>
+            );
+        },
+    },
+
+    block: {
+        normal: ({ children }) => <p className="">{children}</p>,
+    },
+
+    list: {
+        bullet: ({ children }) => <ul className="">{children}</ul>,
+
+        number: ({ children }) => <ol className="">{children}</ol>,
+    },
+
+    listItem: {
+        bullet: ({ children }) => <li>{children}</li>,
+        number: ({ children }) => <li>{children}</li>,
+    },
 };
 
 export default function FAQFormat({
@@ -43,7 +94,7 @@ export default function FAQFormat({
 
                             return (
                                 <article
-                                    key={faq.question}
+                                    key={faq._id}
                                     onClick={() =>
                                         setOpenIndex(isOpen ? null : index)
                                     }
@@ -66,21 +117,18 @@ export default function FAQFormat({
                                     </div>
 
                                     {isOpen && (
-                                        <div className="max-w-3xl pb-8">
-                                            <p className="faq-answer">
-                                                {faq.answer}
-                                            </p>
-
-                                            {faq.link && faq.linkText ? (
-                                                <div className="mt-3">
-                                                    <Link
-                                                        href={faq.link}
-                                                        className="button-text"
-                                                    >
-                                                        {faq.linkText}
-                                                    </Link>
-                                                </div>
-                                            ) : null}
+                                        <div
+                                            className="max-w-3xl pb-8"
+                                            onClick={(event) =>
+                                                event.stopPropagation()
+                                            }
+                                        >
+                                            <PortableText
+                                                value={faq.richAnswer}
+                                                components={
+                                                    portableTextComponents
+                                                }
+                                            />
                                         </div>
                                     )}
                                 </article>
