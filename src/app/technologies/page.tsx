@@ -5,7 +5,7 @@ import { technologyGroups } from "@/content/technologies-data";
 import TechStack from "./_components/TechStack";
 
 import { client } from "@/sanity/client";
-import { META_DATA_WEBPAGE_QUERY } from "@/sanity/lib/queries";
+import { META_DATA_WEBPAGE_QUERY } from "@/sanity/queries";
 
 export async function generateMetadata(): Promise<Metadata> {
     const slug = "technologies";

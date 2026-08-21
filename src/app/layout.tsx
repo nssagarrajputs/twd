@@ -8,7 +8,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { GlobalSchema } from "@/components/StructuredData";
 import { client } from "@/sanity/client";
-import { META_DATA_WEBPAGE_QUERY } from "@/sanity/lib/queries";
+import { META_DATA_WEBPAGE_QUERY } from "@/sanity/queries";
 
 export async function generateMetadata(): Promise<Metadata> {
     const page = await client.fetch(META_DATA_WEBPAGE_QUERY, {

@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import { SolutionsPageSchema } from "@/components/StructuredData";
 
 import { client } from "@/sanity/client";
-import { META_DATA_WEBPAGE_QUERY } from "@/sanity/lib/queries";
+import { META_DATA_WEBPAGE_QUERY } from "@/sanity/queries";
 
 export async function generateMetadata(): Promise<Metadata> {
     const slug = "solutions";

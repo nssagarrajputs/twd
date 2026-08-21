@@ -8,24 +8,40 @@ import { ArrowLeft } from "lucide-react";
 import { client } from "@/sanity/client";
 import { BlogPostSchema } from "@/components/StructuredData";
 import DefBlogThumbnail from "@/assets/other/default-thumbnail.webp";
-import { ptComponents } from "@/components/PortableTextFormat";
 import type { Metadata } from "next";
 import { SectionHeaderCentered } from "@/components/ui/SectionHeaderType";
+import { bcsComponents } from "@/components/PTF/BlogCaseText";
 
 type BlogPost = {
     title: string;
+    seoTitle: string;
+    seoDescription: string;
     slug: string;
     excerpt: string;
     publishedAt: string;
+    lastModifiedAt?: string;
     readTime: number;
-    coverImage: string | null;
-    category: string;
+
+    coverImage: {
+        url: string;
+        alt: string;
+    } | null;
+
+    categories: string[];
     tags: string[];
+
     author: {
         name: string;
         role: string;
         photo: string | null;
     };
+
+    contributors: {
+        name: string;
+        role: string;
+        photo: string | null;
+    }[];
+
     body: PortableTextBlock[];
 };
 
@@ -36,27 +52,44 @@ type RelatedPost = {
     coverImage: string | null;
 };
 
-// ─── Queries ──────────────────────────────────────────────────────────────────
-
 const BLOG_DETAIL_QUERY = groq`
   *[_type == "blogPost" && slug.current == $slug][0] {
     title,
+    seoTitle,
+    seoDescription,
     "slug": slug.current,
     excerpt,
     publishedAt,
+    lastModifiedAt,
     readTime,
-    "coverImage": coverImage.asset->url,
-    "category": categories[0]->name,
+
+    "coverImage": coverImage {
+      "url": asset->url,
+      alt
+    },
+
+    "categories": categories[]->name,
     tags,
+
     "author": author->{
       name,
       role,
-      "photo": photo.asset->url,
+      "photo": photo.asset->url
     },
+
+    "contributors": contributors[]->{
+      name,
+      role,
+      "photo": photo.asset->url
+    },
+
     body[]{
       ...,
+
       _type == "image" => {
         ...,
+        alt,
+        caption,
         "asset": asset->{url}
       }
     }
@@ -76,12 +109,10 @@ const BLOG_RELATED_QUERY = groq`
 
 export async function generateStaticParams() {
     const slugs: { slug: string }[] = await client.fetch(
-        groq`*[_type == "post"]{ "slug": slug.current }`,
+        groq`*[_type == "blogPost"]{ "slug": slug.current }`,
     );
     return slugs.map((s) => ({ slug: s.slug }));
 }
-
-export const revalidate = 86400;
 
 // ─── generateMetadata ─────────────────────────────────────────────────────────
 
@@ -92,39 +123,31 @@ export async function generateMetadata(props: {
     const post: BlogPost = await client.fetch(BLOG_DETAIL_QUERY, { slug });
     if (!post) return {};
     return {
-        title: post.title,
-        description: post.excerpt,
+        title: post.seoTitle,
+        description: post.seoDescription,
         alternates: { canonical: `/blog/${slug}` },
         openGraph: {
             type: "article",
-            title: post.title,
-            description: post.excerpt,
+            title: post.seoTitle,
+            description: post.seoDescription,
             url: `https://www.tecorbitron.com/blog/${slug}`,
-            images: post.coverImage
-                ? [
-                      {
-                          url: post.coverImage,
-                          width: 1200,
-                          height: 630,
-                          alt: post.title,
-                      },
-                  ]
-                : [
-                      {
-                          url: "/opengraph/og-insights.png",
-                          width: 1200,
-                          height: 630,
-                          alt: post.title,
-                      },
-                  ],
+            publishedTime: post.publishedAt,
+            modifiedTime: post.lastModifiedAt || post.publishedAt,
+            authors: post.author?.name ? [post.author.name] : undefined,
+            images: [
+                {
+                    url: post.coverImage?.url || "/opengraph/og-global.jpg",
+                    width: 1200,
+                    height: 630,
+                    alt: post.coverImage?.alt || post.title,
+                },
+            ],
         },
         twitter: {
             card: "summary_large_image",
-            title: post.title,
-            description: post.excerpt,
-            images: post.coverImage
-                ? [post.coverImage]
-                : ["/opengraph/og-insights.png"],
+            title: post.seoTitle,
+            description: post.seoDescription,
+            images: [post.coverImage?.url || "/opengraph/og-global.jpg"],
         },
     };
 }
@@ -155,7 +178,7 @@ export default async function BlogPostPage(props: {
 
     return (
         <main>
-            <BlogPostSchema post={post} />
+            {/* <BlogPostSchema post={post} /> */}
 
             <section className="dark side-layout-spacing">
                 <div className="edge-dark mx-auto max-w-7xl border-x py-24">
@@ -178,8 +201,8 @@ export default async function BlogPostPage(props: {
 
                         <div className="edge-dark relative aspect-video w-full border">
                             <Image
-                                src={post.coverImage || DefBlogThumbnail}
-                                alt={post.title}
+                                src={post.coverImage?.url || DefBlogThumbnail}
+                                alt={post.coverImage?.alt || post.title}
                                 fill
                                 sizes="(max-width: 1024px) 100vw, 900px"
                                 className="w-full object-cover"
@@ -196,7 +219,7 @@ export default async function BlogPostPage(props: {
                         <div className="flex-vertical gap-8">
                             <PortableText
                                 value={post.body}
-                                components={ptComponents}
+                                components={bcsComponents}
                             />
                         </div>
 
@@ -214,57 +237,6 @@ export default async function BlogPostPage(props: {
                                 ))}
                             </div>
                         )}
-
-                        <div className="section-edge-dark"></div>
-
-                        <div>
-                            <h2 className="section-subtitle mb-6 tracking-wide uppercase">
-                                Share this article
-                            </h2>
-                            <div className="flex flex-wrap items-center gap-4">
-                                {[
-                                    {
-                                        label: "LinkedIn",
-                                        href: "https://www.linkedin.com/company/tecorbitrons",
-                                        content: "Ln",
-                                    },
-                                    {
-                                        label: "Instagram",
-                                        href: "https://www.instagram.com/tecorbitron",
-                                        content: "Ig",
-                                    },
-                                    {
-                                        label: "Facebook",
-                                        href: "https://www.facebook.com/tecorbitron",
-                                        content: "Fb",
-                                    },
-                                    // {
-                                    //     label: "CopyURl",
-                                    //     href: "https://www.youtube.com/@Tecorbitron",
-                                    //     content: (
-                                    //         <LinkIcon
-                                    //             size={16}
-                                    //             strokeWidth={2.5}
-                                    //         />
-                                    //     ),
-                                    // },
-                                ].map(({ label, href, content }) => (
-                                    <a
-                                        key={label}
-                                        href={href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        aria-label={`Visit Tecorbitron on ${label}`}
-                                        className="edge-dark group hover:border-malachite smooth-transition bg-primary/10 flex-center active:border-malachite h-12 w-12 rounded-full border"
-                                        title={label}
-                                    >
-                                        <span className="text-ink-muted group-hover:text-malachite text-16 group-active:text-malachite font-bold">
-                                            {content}
-                                        </span>
-                                    </a>
-                                ))}
-                            </div>
-                        </div>
                     </div>
                 </div>
             </section>

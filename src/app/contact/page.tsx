@@ -6,7 +6,7 @@ import ProjectInquiry from "./_components/ProjectInquiry";
 import WaysToConnect from "./_components/WaysToConnect";
 import FAQSection from "@/components/templates/FAQFormat";
 import { client } from "@/sanity/client";
-import { FAQS_QUERY, META_DATA_WEBPAGE_QUERY } from "@/sanity/lib/queries";
+import { FAQS_QUERY, META_DATA_WEBPAGE_QUERY } from "@/sanity/queries";
 
 export async function generateMetadata(): Promise<Metadata> {
     const slug = "contact";
