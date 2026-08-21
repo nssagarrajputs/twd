@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import PageHero from "@/components/ui/PageHero";
 import { client } from "@/sanity/client";
 import { PortableText } from "@portabletext/react";
-import { legalTextComponents } from "@/components/PTF/LegalText";
+import { legalTextComponents } from "@/components/PTF/LegalText";   
 
 // ─── Queries ────────────────────────────────────────────────────────
 
@@ -81,7 +81,6 @@ export default async function LegalPage({
     return (
         <main>
             <PageHero
-                eyebrow="legal"
                 title={page.title}
                 description={`Last Updated: ${formattedDate}, Effective Immediately`}
             />

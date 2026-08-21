@@ -3,32 +3,26 @@ import { PortableText } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/types";
 import { client } from "@/sanity/client";
 import { groq } from "next-sanity";
+import { testomonialTextComponents } from "@/components/PTF/TestomonialText";
 
 const TESTIMONIALS_QUERY = groq`
     *[
         _type == "testimonial"
     ] | order(reviewDate desc) {
         _id,
-        reviewerName,
-        role,
         companyName,
         quote,
         rating,
-        reviewDate,
         source
     }
 `;
 
 type Testimonial = {
     _id: string;
-    reviewerName: string;
-    role?: string;
     companyName: string;
     rating: number;
     quote: PortableTextBlock[];
     source?: string;
-    reviewDate: string;
-    forProjectTitle?: string;
 };
 
 export default async function Testimonials() {
@@ -52,19 +46,20 @@ export default async function Testimonials() {
                             className="edge-dark side-breathing border-t border-r py-12"
                         >
                             <div className="flex-vertical gap-6">
-                                <div className="flex-ic-jb text-ink-muted">
-                                    <div className="text-16">
-                                        <span className="text-malachite">
-                                            {review.rating.toFixed(1)}
-                                        </span>{" "}
-                                        | {review.source ?? "Verified Client"}
-                                    </div>
-                                    <span className="font-black">
+                                <div className="flex gap-x-2">
+                                    <span className="text-malachite text-16 font-black">
+                                        {review.rating.toFixed(1)}
+                                    </span>
+
+                                    <span className="text-ink-primary font-bold">
                                         {review.companyName}
                                     </span>
                                 </div>
                                 <blockquote className="text-body text-ink-secondary line-clamp-4 leading-relaxed tracking-wide">
-                                    <PortableText value={review.quote} />
+                                    <PortableText
+                                        value={review.quote}
+                                        components={testomonialTextComponents}
+                                    />
                                 </blockquote>
                             </div>
                         </div>
