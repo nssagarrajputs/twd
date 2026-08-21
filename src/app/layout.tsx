@@ -70,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
             description,
             images: [
                 {
-                    url: "/opengraph/og-global.png",
+                    url: "/opengraph/og-global.jpg",
                     width: 1200,
                     height: 630,
                     alt: title,
@@ -81,7 +81,7 @@ export async function generateMetadata(): Promise<Metadata> {
             card: "summary_large_image",
             title,
             description,
-            images: ["/opengraph/og-global.png"],
+            images: ["/opengraph/og-global.jpg"],
         },
 
         category: "technology",

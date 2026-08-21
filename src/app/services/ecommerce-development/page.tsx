@@ -21,7 +21,9 @@ export async function generateMetadata(): Promise<Metadata> {
     const title = metaData?.metaTitle ?? "E-Commerce Development - Tecorbitron";
     const description =
         metaData?.metaDescription ?? "Best IT Services Company.";
-    const keywords = metaData?.keywords ?? ["ecommerce development tecorbitron"];
+    const keywords = metaData?.keywords ?? [
+        "ecommerce development tecorbitron",
+    ];
 
     return {
         title,
@@ -36,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
             url: `https://www.tecorbitron.com/services/${slug}`,
             images: [
                 {
-                    url: "/opengraph/og-global.png",
+                    url: "/opengraph/og-global.jpg",
                     width: 1200,
                     height: 630,
                     alt: title,
@@ -44,7 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
             ],
         },
         twitter: {
-            images: ["/opengraph/og-global.png"],
+            images: ["/opengraph/og-global.jpg"],
         },
     };
 }
