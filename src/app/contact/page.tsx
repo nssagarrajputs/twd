@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
         alternates: { canonical: `/${slug}` },
         openGraph: {
             type: "website",
-            locale: "en_IN",
+            locale: "en_US",
             siteName: "Tecorbitron",
             url: `https://www.tecorbitron.com/${slug}`,
             images: [

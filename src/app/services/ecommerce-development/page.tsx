@@ -33,9 +33,9 @@ export async function generateMetadata(): Promise<Metadata> {
         alternates: { canonical: `/services/${slug}` },
         openGraph: {
             type: "website",
-            locale: "en_IN",
+            locale: "en_US",
             siteName: "Tecorbitron",
-            url: `https://www.tecorbitron.com/services/${slug}`,
+            url: `/services/${slug}`,
             images: [
                 {
                     url: "/opengraph/og-global.jpg",

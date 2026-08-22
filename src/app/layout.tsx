@@ -11,15 +11,18 @@ import { client } from "@/sanity/client";
 import { META_DATA_WEBPAGE_QUERY } from "@/sanity/queries";
 
 export async function generateMetadata(): Promise<Metadata> {
-    const page = await client.fetch(META_DATA_WEBPAGE_QUERY, {
+    const metaData = await client.fetch(META_DATA_WEBPAGE_QUERY, {
         slug: "global",
     });
 
-    const title = page?.metaTitle ?? "Tecorbitron";
-    const description = page?.metaDescription ?? "Best IT Services Company.";
-    const keywords = page?.keywords ?? ["tecorbitron"];
+    const title = metaData?.metaTitle ?? "Tecorbitron";
+    const description =
+        metaData?.metaDescription ?? "Best IT Services Company.";
+    const keywords = metaData?.keywords ?? ["tecorbitron"];
 
     return {
+        metadataBase: new URL("https://www.tecorbitron.com"),
+
         title,
         description,
         keywords,
@@ -28,7 +31,6 @@ export async function generateMetadata(): Promise<Metadata> {
         creator: "Tecorbitron Solutions Private Limited",
         publisher: "Tecorbitron Solutions Private Limited",
 
-        metadataBase: new URL("https://www.tecorbitron.com"),
         alternates: {
             canonical: "/",
         },
@@ -63,8 +65,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
         openGraph: {
             type: "website",
-            locale: "en_IN",
-            url: "https://www.tecorbitron.com",
+            locale: "en_US",
+            url: "/",
             siteName: "Tecorbitron",
             title,
             description,
