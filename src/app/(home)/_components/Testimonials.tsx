@@ -1,14 +1,11 @@
 import { SectionHeaderCentered } from "@/components/ui/SectionHeaderType";
-import { PortableText } from "@portabletext/react";
-import type { PortableTextBlock } from "@portabletext/types";
 import { client } from "@/sanity/client";
 import { groq } from "next-sanity";
-import { testomonialTextComponents } from "@/components/PTF/TestomonialText";
 
 const TESTIMONIALS_QUERY = groq`
     *[
         _type == "testimonial"
-    ] | order(reviewDate desc) {
+    ] | order(reviewDate desc)[0...6] {
         _id,
         companyName,
         quote,
@@ -21,7 +18,7 @@ type Testimonial = {
     _id: string;
     companyName: string;
     rating: number;
-    quote: PortableTextBlock[];
+    quote: string;
     source?: string;
 };
 
@@ -56,10 +53,7 @@ export default async function Testimonials() {
                                     </span>
                                 </div>
                                 <blockquote className="text-body text-ink-secondary line-clamp-4 leading-relaxed tracking-wide">
-                                    <PortableText
-                                        value={review.quote}
-                                        components={testomonialTextComponents}
-                                    />
+                                    {review.quote}
                                 </blockquote>
                             </div>
                         </div>
