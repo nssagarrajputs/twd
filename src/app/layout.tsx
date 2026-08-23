@@ -7,13 +7,22 @@ import { GoogleTagManager } from "@next/third-parties/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { GlobalSchema } from "@/components/StructuredData";
+
 import { client } from "@/sanity/client";
-import { META_DATA_WEBPAGE_QUERY } from "@/sanity/queries";
+import {
+    META_DATA_WEBPAGE_QUERY,
+    type WebpageMetadata,
+} from "@/sanity/queries";
 
 export async function generateMetadata(): Promise<Metadata> {
-    const metaData = await client.fetch(META_DATA_WEBPAGE_QUERY, {
-        slug: "global",
-    });
+    const slug = "global";
+
+    const metaData = await client.fetch<WebpageMetadata | null>(
+        META_DATA_WEBPAGE_QUERY,
+        {
+            slug,
+        },
+    );
 
     const title = metaData?.metaTitle ?? "Tecorbitron";
     const description =

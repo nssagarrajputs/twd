@@ -9,33 +9,39 @@ import type { Metadata } from "next";
 import { EcommerceServiceSchema } from "@/components/StructuredData";
 
 import { client } from "@/sanity/client";
-import { META_DATA_WEBPAGE_QUERY } from "@/sanity/queries";
+import {
+    META_DATA_WEBPAGE_QUERY,
+    type WebpageMetadata,
+} from "@/sanity/queries";
 
 export async function generateMetadata(): Promise<Metadata> {
     const slug = "ecommerce-development";
 
-    const metaData = await client.fetch(META_DATA_WEBPAGE_QUERY, {
-        slug,
-    });
+    const metaData = await client.fetch<WebpageMetadata | null>(
+        META_DATA_WEBPAGE_QUERY,
+        {
+            slug,
+        },
+    );
 
-    const title = metaData?.metaTitle ?? "E-Commerce Development - Tecorbitron";
+    const title = metaData?.metaTitle ?? "Tecorbitron";
     const description =
         metaData?.metaDescription ?? "Best IT Services Company.";
-    const keywords = metaData?.keywords ?? [
-        "ecommerce development tecorbitron",
-    ];
+    const keywords = metaData?.keywords ?? ["tecorbitron"];
 
     return {
         title,
         description,
         keywords,
 
-        alternates: { canonical: `/services/${slug}` },
+        alternates: { canonical: `/${slug}` },
         openGraph: {
             type: "website",
             locale: "en_US",
             siteName: "Tecorbitron",
-            url: `/services/${slug}`,
+            url: `/${slug}`,
+            title,
+            description,
             images: [
                 {
                     url: "/opengraph/og-global.jpg",
@@ -46,6 +52,9 @@ export async function generateMetadata(): Promise<Metadata> {
             ],
         },
         twitter: {
+            card: "summary_large_image",
+            title,
+            description,
             images: ["/opengraph/og-global.jpg"],
         },
     };

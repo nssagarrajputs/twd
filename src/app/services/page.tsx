@@ -13,19 +13,27 @@ import {
 } from "@/components/StructuredData";
 
 import { client } from "@/sanity/client";
-import { FAQS_QUERY, META_DATA_WEBPAGE_QUERY } from "@/sanity/queries";
+import { FAQS_QUERY } from "@/sanity/queries";
+
+import {
+    META_DATA_WEBPAGE_QUERY,
+    type WebpageMetadata,
+} from "@/sanity/queries";
 
 export async function generateMetadata(): Promise<Metadata> {
     const slug = "services";
 
-    const metaData = await client.fetch(META_DATA_WEBPAGE_QUERY, {
-        slug,
-    });
+    const metaData = await client.fetch<WebpageMetadata | null>(
+        META_DATA_WEBPAGE_QUERY,
+        {
+            slug,
+        },
+    );
 
-    const title = metaData?.metaTitle ?? "View All Services - Tecorbitron";
+    const title = metaData?.metaTitle ?? "Tecorbitron";
     const description =
         metaData?.metaDescription ?? "Best IT Services Company.";
-    const keywords = metaData?.keywords ?? ["view all services tecorbitron"];
+    const keywords = metaData?.keywords ?? ["tecorbitron"];
 
     return {
         title,
@@ -38,6 +46,8 @@ export async function generateMetadata(): Promise<Metadata> {
             locale: "en_US",
             siteName: "Tecorbitron",
             url: `/${slug}`,
+            title,
+            description,
             images: [
                 {
                     url: "/opengraph/og-global.jpg",
@@ -48,6 +58,9 @@ export async function generateMetadata(): Promise<Metadata> {
             ],
         },
         twitter: {
+            card: "summary_large_image",
+            title,
+            description,
             images: ["/opengraph/og-global.jpg"],
         },
     };
