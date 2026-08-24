@@ -9,8 +9,7 @@ const TESTIMONIALS_QUERY = groq`
         _id,
         companyName,
         quote,
-        rating,
-        source
+        rating
     }
 `;
 
@@ -19,7 +18,6 @@ type Testimonial = {
     companyName: string;
     rating: number;
     quote: string;
-    source?: string;
 };
 
 export default async function Testimonials() {

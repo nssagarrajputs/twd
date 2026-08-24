@@ -35,7 +35,9 @@ export const faqAnsTextComponents: PortableTextComponents = {
     },
 
     block: {
-        normal: ({ children }) => <p className="">{children}</p>,
+        normal: ({ children }) => (
+            <p className="text-18 leading-relaxed">{children}</p>
+        ),
     },
 
     list: {

@@ -7,7 +7,7 @@ import WaysToConnect from "./_components/WaysToConnect";
 import FAQSection from "@/components/templates/FAQFormat";
 import { client } from "@/sanity/client";
 import {
-    FAQS_QUERY,
+    getFAQs,
     META_DATA_WEBPAGE_QUERY,
     type WebpageMetadata,
 } from "@/sanity/queries";
@@ -59,8 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Contact() {
-    const webpageSlug = "contact";
-    const faqs = await client.fetch(FAQS_QUERY, { webpageSlug });
+    const faqs = await getFAQs("contact");
 
     return (
         <main>

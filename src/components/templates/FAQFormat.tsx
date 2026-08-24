@@ -2,21 +2,13 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { PortableText } from "@portabletext/react";
-import type { PortableTextBlock } from "@portabletext/types";
 import { faqAnsTextComponents } from "@/components/PTF/FaqAnsText";
-
-type FAQItem = {
-    _id: string;
-    question: string;
-    plainAnswer: string;
-    richAnswer: PortableTextBlock[];
-    sortOrder?: number;
-};
+import type { FAQ } from "@/sanity/queries";
 
 type FAQSectionProps = {
     eyebrow: string;
     heading: string;
-    items: FAQItem[];
+    items: FAQ[];
     defaultOpenIndex?: number | null;
 };
 

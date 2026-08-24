@@ -11,11 +11,9 @@ import {
     EcommerceServiceSchema,
     SeoServiceSchema,
 } from "@/components/StructuredData";
-
 import { client } from "@/sanity/client";
-import { FAQS_QUERY } from "@/sanity/queries";
-
 import {
+    getFAQs,
     META_DATA_WEBPAGE_QUERY,
     type WebpageMetadata,
 } from "@/sanity/queries";
@@ -67,8 +65,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Services() {
-    const webpageSlug = "services";
-    const faqs = await client.fetch(FAQS_QUERY, { webpageSlug });
+    const faqs = await getFAQs("services");
 
     return (
         <main>

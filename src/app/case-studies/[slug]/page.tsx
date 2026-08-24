@@ -3,258 +3,540 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { PortableText } from "@portabletext/react";
-import { client } from "@/sanity/client";
+import type { PortableTextBlock } from "@portabletext/types";
 import { groq } from "next-sanity";
-import DefBlogThumbnail from "@/assets/other/default-thumbnail.webp";
+import type { Metadata } from "next";
+
+import { client } from "@/sanity/client";
+import DefProjectThumbnail from "@/assets/other/default-thumbnail.webp";
 import { bcsComponents } from "@/components/PTF/BlogCaseText";
 import { CaseStudySchema } from "@/components/StructuredData";
-import type { Metadata } from "next";
 import CTAFormat from "@/components/templates/CTAFormat";
 import { SectionHeaderCentered } from "@/components/ui/SectionHeaderType";
 
-type TechStack = {
+type Taxonomy = {
+    _id: string;
     name: string;
-    category: string;
+    slug: string;
+};
+
+type TechStack = Taxonomy & {
+    category?: string;
+};
+
+type KeyResult = {
+    metric: string;
+    value: string;
+};
+
+type Testimonial = {
+    _id: string;
+    reviewerName: string;
+    role?: string;
+    clientHeadshot: string | null;
+    companyName: string;
+    companyLogo: string | null;
+    rating: number;
+    quote: string;
+    reviewDate: string;
+    source?: string;
+};
+
+type CaseStudy = {
+    _id: string;
+    projectName: string;
+    title: string;
+    slug: string;
+
+    seoTitle: string;
+    seoDescription: string;
+
+    industries: Taxonomy[];
+    solutions: Taxonomy[];
+    services: Taxonomy[];
+    techStack: TechStack[];
+
+    completedAt: string;
+    duration: string;
+    livePreview?: string;
+
+    thumbnail: {
+        url: string;
+        alt?: string;
+    } | null;
+
+    body: PortableTextBlock[];
+
+    keyResults: KeyResult[];
+
+    testimonials: Testimonial[];
 };
 
 type RelatedProject = {
+    _id: string;
     projectName: string;
     title: string;
     slug: string;
     thumbnail: string | null;
 };
 
-// ─── Queries ──────────────────────────────────────────────────────────────────
+const CASE_STUDY_DETAIL_QUERY = groq`
+    *[
+        _type == "caseStudy" &&
+        slug.current == $slug
+    ][0] {
+        _id,
+        projectName,
+        title,
+        "slug": slug.current,
 
-const PORTFOLIO_DETAIL_QUERY = groq`
-  *[_type == "caseStudy" && slug.current == $slug][0] {
-    projectName,
-    title,
-    "slug": slug.current,
-    "thumbnail": thumbnail.asset->url,
-    "industries": industries[]->name,
-    "techStack": techStack[]->{name, category},
-    completedAt,
-    livePreview,
-    body[]{
-      ...,
-      _type == "image" => {
-        ...,
-        "asset": asset->{url}
-      }
+        seoTitle,
+        seoDescription,
+
+        "industries": coalesce(
+            industries[]->{
+                _id,
+                name,
+                "slug": slug.current
+            },
+            []
+        ),
+
+        "solutions": coalesce(
+            solutions[]->{
+                _id,
+                name,
+                "slug": slug.current
+            },
+            []
+        ),
+
+        "services": coalesce(
+            services[]->{
+                _id,
+                name,
+                "slug": slug.current
+            },
+            []
+        ),
+
+        "techStack": coalesce(
+            techStack[]->{
+                _id,
+                name,
+                "slug": slug.current,
+                category
+            },
+            []
+        ),
+
+        completedAt,
+        duration,
+        livePreview,
+
+        "thumbnail": thumbnail {
+            "url": asset->url,
+            alt
+        },
+
+        body[] {
+            ...,
+
+            _type == "image" => {
+                ...,
+                alt,
+                caption,
+                "asset": asset->{
+                    url
+                }
+            }
+        },
+
+        "keyResults": coalesce(
+            keyResults[] {
+                metric,
+                value
+            },
+            []
+        ),
+
+        "testimonials": coalesce(
+            testimonials[]->{
+                _id,
+                reviewerName,
+                role,
+                "clientHeadshot": clientHeadshot.asset->url,
+                companyName,
+                "companyLogo": companyLogo.asset->url,
+                rating,
+                quote,
+                reviewDate,
+                source
+            },
+            []
+        )
     }
-    
-  }
 `;
 
-const PORTFOLIO_RELATED_QUERY = groq`
-  *[_type == "caseStudy" && slug.current != $slug] | order(completedAt desc) [0...3] {
-    projectName,
-    title,
-    "slug": slug.current,
-    "thumbnail": thumbnail.asset->url,
-  }
+const CASE_STUDY_SLUGS_QUERY = groq`
+    *[
+        _type == "caseStudy" &&
+        defined(slug.current)
+    ] {
+        "slug": slug.current
+    }
 `;
 
-// ─── Static Params ────────────────────────────────────────────────────────────
+const CASE_STUDY_RELATED_QUERY = groq`
+    *[
+        _type == "caseStudy" &&
+        slug.current != $slug &&
+        (
+            count(industries[@._ref in $industryIds]) > 0 ||
+            count(solutions[@._ref in $solutionIds]) > 0 ||
+            count(services[@._ref in $serviceIds]) > 0
+        )
+    ]
+    | order(completedAt desc)[0...3] {
+        _id,
+        projectName,
+        title,
+        "slug": slug.current,
+        "thumbnail": thumbnail.asset->url
+    }
+`;
 
 export async function generateStaticParams() {
-    const slugs: { slug: string }[] = await client.fetch(
-        groq`*[_type == "project"]{ "slug": slug.current }`,
+    const slugs = await client.fetch<{ slug: string }[]>(
+        CASE_STUDY_SLUGS_QUERY,
     );
-    return slugs.map((s) => ({ slug: s.slug }));
+
+    return slugs.map((item) => ({
+        slug: item.slug,
+    }));
 }
 
-export const revalidate = 86400;
-
-// ─── generateMetadata ─────────────────────────────────────────────────────────
-
-export async function generateMetadata(props: {
+export async function generateMetadata({
+    params,
+}: {
     params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-    const { slug } = await props.params;
-    const proj = await client.fetch(PORTFOLIO_DETAIL_QUERY, { slug });
-    if (!proj) return {};
+    const { slug } = await params;
+
+    const project = await client.fetch<CaseStudy | null>(
+        CASE_STUDY_DETAIL_QUERY,
+        {
+            slug,
+        },
+    );
+
+    if (!project) {
+        return {};
+    }
+
+    const title = project.seoTitle;
+    const description = project.seoDescription;
+
+    const image = project.thumbnail?.url || "/opengraph/og-global.jpg";
+
     return {
-        title: proj.projectName,
-        description: proj.summary
-            ? proj.summary.slice(0, 155)
-            : `${proj.projectName} — A project by Tecorbitron Solutions`,
-        alternates: { canonical: `/case-studies/${slug}` },
+        title,
+        description,
+
+        alternates: {
+            canonical: `/case-studies/${project.slug}`,
+        },
+
         openGraph: {
             type: "article",
-            title: `${proj.projectName} — Tecorbitron Portfolio`,
-            description: proj.summary?.slice(0, 155) ?? "",
-            url: `https://www.tecorbitron.com/case-studies/${slug}`,
-            images: proj.thumbnail
-                ? [
-                      {
-                          url: proj.thumbnail,
-                          width: 1200,
-                          height: 630,
-                          alt: proj.projectName,
-                      },
-                  ]
-                : [
-                      {
-                          url: "/opengraph/og-global.jpg",
-                          width: 1200,
-                          height: 630,
-                          alt: proj.projectName,
-                      },
-                  ],
+            title,
+            description,
+            url: `https://www.tecorbitron.com/case-studies/${project.slug}`,
+            images: [
+                {
+                    url: image,
+                    width: 1200,
+                    height: 630,
+                    alt: project.thumbnail?.alt || project.projectName,
+                },
+            ],
         },
+
         twitter: {
             card: "summary_large_image",
-            title: `${proj.projectName} — Tecorbitron Portfolio`,
-            description: proj.summary?.slice(0, 155) ?? "",
-            images: proj.thumbnail
-                ? [proj.thumbnail]
-                : ["/opengraph/og-casestudies.png"],
+            title,
+            description,
+            images: [image],
         },
     };
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+function formatDate(dateStr: string) {
+    return new Date(dateStr).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+    });
+}
 
-export default async function ProjectDetailPage(props: {
+function TaxonomyGroup({ title, items }: { title: string; items: Taxonomy[] }) {
+    if (items.length === 0) {
+        return null;
+    }
+
+    return (
+        <div>
+            <h2 className="text-h3 text-ink-primary mb-6">{title}</h2>
+
+            <div className="flex flex-wrap gap-4">
+                {items.map((item) => (
+                    <span
+                        key={item._id}
+                        className="bg-primary/20 text-primary px-4 py-2 font-medium"
+                    >
+                        {item.name}
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export default async function CaseStudyDetailPage({
+    params,
+}: {
     params: Promise<{ slug: string }>;
 }) {
-    const { slug } = await props.params;
+    const { slug } = await params;
 
-    const [projData, related] = await Promise.all([
-        client.fetch(PORTFOLIO_DETAIL_QUERY, { slug }),
-        client.fetch(PORTFOLIO_RELATED_QUERY, { slug }),
-    ]);
+    const project = await client.fetch<CaseStudy | null>(
+        CASE_STUDY_DETAIL_QUERY,
+        {
+            slug,
+        },
+    );
 
-    if (!projData) notFound();
+    if (!project) {
+        notFound();
+    }
+
+    const industryIds = project.industries.map((item) => item._id);
+
+    const solutionIds = project.solutions.map((item) => item._id);
+
+    const serviceIds = project.services.map((item) => item._id);
+
+    const related = await client.fetch<RelatedProject[]>(
+        CASE_STUDY_RELATED_QUERY,
+        {
+            slug,
+            industryIds,
+            solutionIds,
+            serviceIds,
+        },
+    );
 
     return (
         <main>
-            <CaseStudySchema project={projData} />
+            {/* <CaseStudySchema project={project} /> */}
 
             <section className="dark side-layout-spacing">
                 <div className="edge-dark mx-auto max-w-7xl border-x py-24">
                     <div className="side-breathing flex-vertical mx-auto max-w-5xl gap-y-12">
                         <div className="flex-vertical flex-col-reverse gap-y-6">
                             <h1 className="section-heading font-bold">
-                                {projData.title}
+                                {project.title}
                             </h1>
+
                             <Link
                                 href="/case-studies"
                                 className="button-text flex w-fit items-center gap-2"
                             >
-                                <ArrowLeft size={18} strokeWidth={1.4} /> Back
+                                <ArrowLeft size={18} strokeWidth={1.4} />
+                                Back
                             </Link>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                            <span className="section-subtitle">
+                                {project.projectName}
+                            </span>
+
+                            <span className="text-ink-muted">
+                                Completed {formatDate(project.completedAt)}
+                            </span>
+
+                            {project.duration && (
+                                <span className="text-ink-muted">
+                                    {project.duration}
+                                </span>
+                            )}
                         </div>
 
                         <div className="edge-dark relative aspect-video w-full border">
                             <Image
-                                src={projData.thumbnail || DefBlogThumbnail}
-                                alt={projData.projectName}
+                                src={
+                                    project.thumbnail?.url ||
+                                    DefProjectThumbnail
+                                }
+                                alt={
+                                    project.thumbnail?.alt ||
+                                    project.projectName
+                                }
                                 fill
                                 sizes="(max-width: 1024px) 100vw, 1024px"
                                 className="w-full object-cover"
-                                preload
+                                priority
                             />
                         </div>
 
-                        {projData.industries?.length > 0 && (
-                            <div className="">
-                                <h2 className="text-h3 text-ink-primary mb-6">
-                                    Industry
-                                </h2>
-                                <div className="flex flex-wrap gap-4">
-                                    {projData.industries.map((ind: string) => (
-                                        <span
-                                            key={ind}
-                                            className="bg-primary/20 text-primary px-4 py-2 font-medium capitalize"
-                                        >
-                                            {ind}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        <div className="flex-vertical gap-12">
+                            <TaxonomyGroup
+                                title="Industry"
+                                items={project.industries}
+                            />
 
-                        {projData.techStack?.length > 0 && (
-                            <div className="">
-                                <h2 className="text-h3 text-ink-primary mb-6">
-                                    Tech Stack
-                                </h2>
-                                <div className="flex flex-wrap gap-4">
-                                    {projData.techStack.map(
-                                        (tech: TechStack) => (
+                            <TaxonomyGroup
+                                title="Solutions"
+                                items={project.solutions}
+                            />
+
+                            <TaxonomyGroup
+                                title="Services"
+                                items={project.services}
+                            />
+
+                            {project.techStack.length > 0 && (
+                                <div>
+                                    <h2 className="text-h3 text-ink-primary mb-6">
+                                        Tech Stack
+                                    </h2>
+
+                                    <div className="flex flex-wrap gap-4">
+                                        {project.techStack.map((tech) => (
                                             <span
-                                                key={tech.name}
-                                                className="bg-secondary/20 text-ink-secondary px-4 py-2 font-medium capitalize"
+                                                key={tech._id}
+                                                className="bg-secondary/20 text-ink-secondary px-4 py-2 font-medium"
                                             >
                                                 {tech.name}
                                             </span>
-                                        ),
-                                    )}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
-                        <div className="section-edge-dark"></div>
+                        <div className="section-edge-dark" />
 
-                        <div className="">
+                        <div>
                             <PortableText
-                                value={projData.body}
+                                value={project.body}
                                 components={bcsComponents}
                             />
                         </div>
+
+                        {project.keyResults.length > 0 && (
+                            <>
+                                <div className="section-edge-dark" />
+
+                                <div>
+                                    <h2 className="text-h3 text-ink-primary mb-8">
+                                        Key Results
+                                    </h2>
+
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        {project.keyResults.map(
+                                            (result, index) => (
+                                                <div
+                                                    key={`${result.metric}-${index}`}
+                                                    className="edge-dark border p-8"
+                                                >
+                                                    <p className="text-malachite text-h2 font-bold">
+                                                        {result.value}
+                                                    </p>
+
+                                                    <p className="text-ink-secondary text-body mt-2">
+                                                        {result.metric}
+                                                    </p>
+                                                </div>
+                                            ),
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {project.livePreview && (
+                            <>
+                                <div className="section-edge-dark" />
+
+                                <div>
+                                    <a
+                                        href={project.livePreview}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="button-secondary"
+                                    >
+                                        View Live Project
+                                    </a>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </section>
 
-            <div className="section-edge-dark"></div>
+           
 
-            {/* Related Projects */}
-            {related?.length > 0 && (
-                <section className="dark side-layout-spacing">
-                    <div className="mx-auto max-w-7xl">
-                        <div className="edge-dark border-x">
-                            <SectionHeaderCentered heading="Related Projects" />
-                        </div>
-                        <div className="edge-dark grid grid-cols-1 border-l lg:grid-cols-3">
-                            {related.map((proj: RelatedProject) => (
-                                <div
-                                    key={proj.slug}
-                                    className="edge-dark side-breathing border-t border-r py-16"
-                                >
-                                    <div className="edge-dark relative aspect-video w-full border">
-                                        <Image
-                                            src={
-                                                proj.thumbnail ||
-                                                DefBlogThumbnail
-                                            }
-                                            alt={proj.projectName}
-                                            fill
-                                            loading="lazy"
-                                            sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 33vw, 400px"
-                                            className="h-auto w-full object-cover"
-                                        />
-                                    </div>
+            {related.length > 0 && (
+                <>
+                    <div className="section-edge-dark" />
 
-                                    <h3 className="card-heading my-8 line-clamp-4">
-                                        {proj.title}
-                                    </h3>
-                                    <Link
-                                        href={`/case-studies/${proj.slug}`}
-                                        className="button-secondary"
+                    <section className="dark side-layout-spacing">
+                        <div className="mx-auto max-w-7xl">
+                            <div className="edge-dark border-x">
+                                <SectionHeaderCentered heading="Related Projects" />
+                            </div>
+
+                            <div className="edge-dark grid grid-cols-1 border-l lg:grid-cols-3">
+                                {related.map((project) => (
+                                    <div
+                                        key={project._id}
+                                        className="edge-dark side-breathing border-t border-r py-16"
                                     >
-                                        View Case Study
-                                    </Link>
-                                </div>
-                            ))}
+                                        <div className="edge-dark relative aspect-video w-full border">
+                                            <Image
+                                                src={
+                                                    project.thumbnail ||
+                                                    DefProjectThumbnail
+                                                }
+                                                alt={project.projectName}
+                                                fill
+                                                loading="lazy"
+                                                sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 33vw, 400px"
+                                                className="h-auto w-full object-cover"
+                                            />
+                                        </div>
+
+                                        <h3 className="card-heading my-8 line-clamp-4">
+                                            {project.title}
+                                        </h3>
+
+                                        <Link
+                                            href={`/case-studies/${project.slug}`}
+                                            className="button-secondary"
+                                        >
+                                            View Case Study
+                                        </Link>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                </>
             )}
 
-            <div className="section-edge-dark"></div>
+            <div className="section-edge-dark" />
 
             <CTAFormat
                 eyebrow="YOUR TURN !"

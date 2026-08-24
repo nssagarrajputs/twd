@@ -2,27 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-
 import Image from "next/image";
+
 import DefBlogThumbnail from "@/assets/other/default-thumbnail.webp";
-
-type Post = {
-    title: string;
-    slug: string;
-    publishedAt: string;
-    readTime: number;
-    category: string;
-    coverImage: string | null;
-};
-
-type Category = {
-    name: string;
-    slug: string;
-};
+import type { BlogCategory, BlogCard } from "../page";
 
 type Props = {
-    posts: Post[];
-    categories: Category[];
+    posts: BlogCard[];
+    categories: BlogCategory[];
 };
 
 function formatDate(dateStr: string) {
@@ -37,13 +24,16 @@ export default function BlogListing({ posts, categories }: Props) {
     const [active, setActive] = useState("All");
 
     const filtered =
-        active === "All" ? posts : posts.filter((p) => p.category === active);
+        active === "All"
+            ? posts
+            : posts.filter((post) => post.categories.includes(active));
 
     return (
         <section className="dark py-24">
             <div className="side-breathing mx-auto max-w-7xl">
                 <div className="mx-auto mb-24 flex flex-wrap gap-4 select-none">
                     <button
+                        type="button"
                         onClick={() => setActive("All")}
                         className={`text-16 smooth-transition text-ink-primary border-secondary-active cursor-pointer border px-4 py-2 font-medium ${
                             active === "All"
@@ -53,12 +43,14 @@ export default function BlogListing({ posts, categories }: Props) {
                     >
                         All Blogs
                     </button>
+
                     {categories.map((cat) => (
                         <button
+                            type="button"
                             key={cat.slug}
-                            onClick={() => setActive(cat.name)}
+                            onClick={() => setActive(cat.slug)}
                             className={`text-16 smooth-transition text-ink-primary border-secondary-active cursor-pointer border px-4 py-2 font-medium ${
-                                active === cat.name
+                                active === cat.slug
                                     ? "bg-primary border-primary"
                                     : "hover:border-primary active:border-primary"
                             }`}
@@ -71,9 +63,8 @@ export default function BlogListing({ posts, categories }: Props) {
                 {filtered.length > 0 ? (
                     <div className="grid grid-cols-1 gap-12 gap-y-24 md:grid-cols-2 lg:grid-cols-3">
                         {filtered.map((post) => (
-                            <Link href={`/blog/${post.slug}`} key={post.slug}>
+                            <Link href={`/blog/${post.slug}`} key={post._id}>
                                 <div className="group flex-vertical overflow-hidden">
-                                    {/* Thumbnail */}
                                     <div className="edge-dark relative aspect-4/2 border">
                                         <Image
                                             src={
@@ -88,17 +79,22 @@ export default function BlogListing({ posts, categories }: Props) {
                                         />
                                     </div>
 
-                                    {/* Content */}
                                     <div className="flex flex-col-reverse gap-6 py-4">
                                         <h3 className="card-heading group-hover:text-primary smooth-transition">
                                             {post.title}
                                         </h3>
+
                                         <div className="text-14 mt-auto flex items-center gap-4 pt-3">
                                             <span className="text-primary smooth-transition group-hover:text-malachite group-active:text-malachite underline-offset-4 group-hover:underline group-active:underline">
                                                 Read Article
                                             </span>
+
                                             <span className="text-ink-muted">
                                                 {formatDate(post.publishedAt)}
+                                            </span>
+
+                                            <span className="text-ink-muted">
+                                                {post.readTime} min read
                                             </span>
                                         </div>
                                     </div>

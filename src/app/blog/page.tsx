@@ -55,26 +55,52 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-const BLOG_LISTING_QUERY = groq`
-  *[_type == "blogPost"] | order(publishedAt desc) {
-    title,
-    "slug": slug.current,
-    publishedAt,
-    "coverImage": coverImage.asset->url,
-  }
-`;
+export type BlogCategory = {
+    _id: string;
+    name: string;
+    slug: string;
+};
+
+export type BlogCard = {
+    _id: string;
+    title: string;
+    slug: string;
+    publishedAt: string;
+    readTime: number;
+    coverImage: string | null;
+    categories: string[];
+};
 
 const BLOG_CATEGORIES_QUERY = groq`
-  *[_type == "blogCategory"] | order(name asc) {
-    name,
-    "slug": slug.current,
-  }
+    *[
+        _type == "blogCategory"
+    ]
+    | order(name asc) {
+        _id,
+        name,
+        "slug": slug.current
+    }
+`;
+
+const BLOGS_QUERY = groq`
+    *[
+        _type == "blogPost"
+    ]
+    | order(publishedAt desc) {
+        _id,
+        title,
+        "slug": slug.current,
+        publishedAt,
+        readTime,
+        "coverImage": coverImage.asset->url,
+        "categories": categories[]->slug.current
+    }
 `;
 
 export default async function Blog() {
-    const [posts, categories] = await Promise.all([
-        client.fetch(BLOG_LISTING_QUERY),
-        client.fetch(BLOG_CATEGORIES_QUERY),
+    const [categories, blogs] = await Promise.all([
+        client.fetch<BlogCategory[]>(BLOG_CATEGORIES_QUERY),
+        client.fetch<BlogCard[]>(BLOGS_QUERY),
     ]);
 
     return (
@@ -88,7 +114,7 @@ export default async function Blog() {
                 description="Practical guides, expert articles, and industry updates on tech and businesses — written by the Tecorbitron team."
             />
 
-            <BlogListing posts={posts} categories={categories} />
+            <BlogListing posts={blogs} categories={categories} />
         </main>
     );
 }

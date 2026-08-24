@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import PageHero from "@/components/ui/PageHero";
-import { client } from "@/sanity/client";
+import type { Metadata } from "next";
 import { groq } from "next-sanity";
 
-import type { Metadata } from "next";
-import DefProjectThumbnail from "@/assets/other/default-thumbnail.webp";
+import PageHero from "@/components/ui/PageHero";
 import { CaseStudiesPageSchema } from "@/components/StructuredData";
+import { client } from "@/sanity/client";
+import DefProjectThumbnail from "@/assets/other/default-thumbnail.webp";
 import {
     META_DATA_WEBPAGE_QUERY,
     type WebpageMetadata,
@@ -32,7 +32,10 @@ export async function generateMetadata(): Promise<Metadata> {
         description,
         keywords,
 
-        alternates: { canonical: `/${slug}` },
+        alternates: {
+            canonical: `/${slug}`,
+        },
+
         openGraph: {
             type: "website",
             locale: "en_US",
@@ -49,6 +52,7 @@ export async function generateMetadata(): Promise<Metadata> {
                 },
             ],
         },
+
         twitter: {
             card: "summary_large_image",
             title,
@@ -58,24 +62,27 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-export type Project = {
-    title: string;
+export type CaseStudyCard = {
+    _id: string;
+    projectName: string;
     slug: string;
     thumbnail: string | null;
-    techStack: string[];
 };
 
-const PORTFOLIO_LIST_QUERY = groq`
-  *[_type == "caseStudy"] | order(completedAt desc) {
-    title,
-    "slug": slug.current,
-    "thumbnail": thumbnail.asset->url,
-    "techStack": techStack[]->name,
-  }
+const CASE_STUDIES_QUERY = groq`
+    *[
+        _type == "caseStudy"
+    ]
+    | order(completedAt desc) {
+        _id,
+        projectName,
+        "slug": slug.current,
+        "thumbnail": thumbnail.asset->url
+    }
 `;
 
-export default async function PortfolioPage() {
-    const projects = await client.fetch<Project[]>(PORTFOLIO_LIST_QUERY);
+export default async function CaseStudiesPage() {
+    const projects = await client.fetch<CaseStudyCard[]>(CASE_STUDIES_QUERY);
 
     return (
         <main>
@@ -93,9 +100,11 @@ export default async function PortfolioPage() {
                     {projects.length === 0 ? (
                         <div className="flex-vertical items-center gap-4 text-center">
                             <span className="text-d1">🚧</span>
+
                             <h2 className="text-ink-primary text-h2 font-medium">
                                 Projects Coming Soon
                             </h2>
+
                             <p className="text-ink-muted text-body max-w-sm">
                                 We&apos;re currently updating our portfolio.
                                 Check back soon or{" "}
@@ -107,19 +116,19 @@ export default async function PortfolioPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-x-16 gap-y-24 lg:grid-cols-2">
-                            {projects.map((proj) => (
+                            {projects.map((project) => (
                                 <div
-                                    key={proj.slug}
+                                    key={project._id}
                                     className="group flex-vertical cursor-pointer justify-between"
                                 >
                                     <div>
                                         <div className="edge-dark aspect-6/3 w-full overflow-hidden border">
                                             <Image
                                                 src={
-                                                    proj.thumbnail ||
+                                                    project.thumbnail ||
                                                     DefProjectThumbnail
                                                 }
-                                                alt={proj.title}
+                                                alt={project.projectName}
                                                 width={500}
                                                 height={500}
                                                 loading="lazy"
@@ -128,11 +137,12 @@ export default async function PortfolioPage() {
                                         </div>
 
                                         <h2 className="card-heading my-8 line-clamp-3">
-                                            {proj.title}
+                                            {project.projectName}
                                         </h2>
                                     </div>
+
                                     <Link
-                                        href={`/case-studies/${proj.slug}`}
+                                        href={`/case-studies/${project.slug}`}
                                         className="button-secondary uppercase"
                                     >
                                         View Case Study
